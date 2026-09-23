@@ -1,0 +1,38 @@
+// database.js（你的db工具文件）
+const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+
+// 原来：../db/auto.db
+// 改成下面这个，对应你实际的库 auto_b2b.db
+const dbPath = path.join(__dirname, './auto_b2b.db');
+const db = new sqlite3.Database(dbPath);
+
+//下面get、all、run封装保持不变
+function get(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (err, row) => {
+      if(err) reject(err);
+      else resolve(row);
+    })
+  })
+}
+
+function all(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (err, rows) => {
+      if(err) reject(err);
+      else resolve(rows);
+    })
+  })
+}
+
+function run(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function(err) {
+      if(err) reject(err);
+      else resolve({ lastID: this.lastID, changes: this.changes });
+    })
+  })
+}
+
+module.exports = { get, all, run };
