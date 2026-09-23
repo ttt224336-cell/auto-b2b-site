@@ -24,7 +24,6 @@
     body { background: #F5F8FC; color: var(--text); min-height: 100vh; display: flex; flex-direction: column; font-size: 15px; }
     a { text-decoration: none; color: inherit; transition: .2s; }
     img { max-width: 100%; display: block; }
-
     /* ===== Header ===== */
     .header {
       background: linear-gradient(90deg, #0A2F5F 0%, #134A8A 100%);
@@ -58,7 +57,6 @@
       background-repeat: no-repeat; background-position: right 6px center;
     }
     .currency select option { color: #111; background: #fff; }
-
     /* ===== Hero ===== */
     .hero {
       margin-top: 58px; min-height: 52vh;
@@ -85,7 +83,6 @@
     .btn-main:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(30,107,217,.4); }
     .btn-accent { background: linear-gradient(135deg, #F59E0B, #E08A00); color:#fff; }
     .btn-outline { background: #fff; color: var(--main); border: 1.5px solid #C5D5EB; }
-
     /* ===== Factory ===== */
     .factory-section {
       background: var(--factory-grad); padding: 56px 20px;
@@ -126,7 +123,6 @@
       width: 22px; height: 22px; border-radius: 50%; background: linear-gradient(135deg,#1E6BD9,#0A2F5F);
       color:#fff; font-size: 12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;
     }
-
     /* ===== Products ===== */
     .products-section {
       padding: 52px 16px 64px;
@@ -174,7 +170,6 @@
       border: 1px solid #D1D9E6; color: var(--text-light);
     }
     .sort-btns a.active { background: var(--blue); color:#fff; border-color: var(--blue); }
-
     .product-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
     }
@@ -213,7 +208,6 @@
       font-size: 12px; padding: 5px 12px; border-radius: 6px;
       background: linear-gradient(135deg, #1E6BD9, #1557B0); color: #fff; font-weight: 500;
     }
-
     .empty-state {
       text-align: center; padding: 60px 20px;
       background: rgba(255,255,255,.7); border-radius: 14px; border: 1px dashed #C5D5EB;
@@ -221,7 +215,6 @@
     .empty-state .icon { font-size: 42px; margin-bottom: 12px; }
     .empty-state h3 { color: var(--main); margin-bottom: 8px; }
     .empty-state p { color: var(--text-light); font-size: 14px; }
-
     /* Detail */
     .detail-page { max-width: 1000px; margin: 70px auto 40px; padding: 0 16px; }
     .back-link { display: inline-block; margin-bottom: 16px; color: var(--blue); font-size: 14px; }
@@ -240,7 +233,6 @@
       display: inline-block; padding: 12px 24px; border-radius: 8px;
       background: #25D366; color:#fff; font-weight:600; font-size:14px;
     }
-
     /* ===== Footer ===== */
     .footer {
       background: var(--footer-grad); color: #D6E0EE; margin-top: auto; padding: 40px 16px 20px;
@@ -256,29 +248,63 @@
       font-size: 13px; line-height: 1.7; color: #A8B8CC; display: block;
     }
     .footer-col a:hover { color: #fff; }
+    /* 小圆形图标横向排列，间距明显 */
     .social-circles {
-      display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;
+      display: flex;
+      gap: 14px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      align-items: center;
     }
     .social-circles a {
-      width: 42px; height: 42px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,.25);
-      overflow: hidden; display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,.08); transition: .2s;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,.1);
+      transition: .2s;
+      flex-shrink: 0;
     }
     .social-circles a:hover {
-      border-color: var(--accent); transform: scale(1.08);
-      background: rgba(255,255,255,.15);
+      border-color: var(--accent);
+      transform: scale(1.1);
+      background: rgba(255,255,255,.18);
     }
-    .social-circles img { width: 100%; height: 100%; object-fit: cover; }
-    .social-circles .placeholder {
-      width: 100%; height: 100%; display:flex; align-items:center; justify-content:center;
-      font-size: 11px; color: rgba(255,255,255,.4);
+    .social-circles img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* 下方输入框：比三个小图标稍长一点 */
+    .social-input {
+      display: block;
+      margin-top: 10px;
+      width: 140px;
+      max-width: 100%;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #D6E0EE;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 6px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .social-input::placeholder {
+      color: rgba(255,255,255,.35);
+    }
+    .social-input:focus {
+      border-color: rgba(255,255,255,.4);
+      background: rgba(255,255,255,.12);
     }
     .footer-bottom {
       text-align: center; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.1);
       font-size: 12px; color: #7A8FA8;
     }
-
     /* WhatsApp float */
     .wa-float {
       position: fixed; bottom: 22px; right: 22px; z-index: 99;
@@ -288,11 +314,9 @@
       box-shadow: 0 4px 16px rgba(37,211,102,.4);
     }
     .wa-float:hover { transform: scale(1.06); }
-
     /* 中英切换显示 */
     html[lang="zh"] .lang-en { display: none !important; }
     html[lang="en"] .lang-zh { display: none !important; }
-
     /* ===== Responsive ===== */
     @media (max-width: 900px) {
       .factory-grid { grid-template-columns: 1fr; }
@@ -335,7 +359,6 @@
     };
     window.__SYMBOLS = { HKD: 'HK$', USD: 'US$', CNY: '¥', KRW: '₩', JPY: '¥' };
   </script>
-
   <header class="header">
     <div class="header-inner">
       <a href="/" class="logo">AUTO <span>PARTS</span> FACTORY</a>
@@ -363,7 +386,6 @@
       </div>
     </div>
   </header>
-
   <% if (page === 'list') { %>
     <!-- Hero -->
     <section class="hero">
@@ -382,7 +404,6 @@
         </div>
       </div>
     </section>
-
     <!-- Factory -->
     <section class="factory-section" id="factory">
       <h2 class="section-title">
@@ -452,7 +473,6 @@
         </div>
       </div>
     </section>
-
     <!-- Products -->
     <section class="products-section" id="products">
       <h2 class="section-title">Our Products</h2>
@@ -460,7 +480,6 @@
         <span class="lang-zh">精选汽车零部件 · 源头工厂直供</span>
         <span class="lang-en">Premium auto parts · Factory direct supply</span>
       </p>
-
       <div class="products-layout">
         <aside class="sidebar">
           <div class="side-card">
@@ -480,7 +499,6 @@
             </div>
           </div>
         </aside>
-
         <div class="main-content">
           <div class="filter-bar">
             <div class="count">
@@ -497,7 +515,6 @@
                  class="<%= sort==='priceDesc' ? 'active' : '' %>">Price ↓</a>
             </div>
           </div>
-
           <% if (typeof products !== 'undefined' && products && products.length) { %>
             <div class="product-grid">
               <% products.forEach(p => { %>
@@ -536,7 +553,6 @@
         </div>
       </div>
     </section>
-
   <% } else if (page === 'detail') { %>
     <div class="detail-page">
       <a href="javascript:history.back()" class="back-link">← <span class="lang-zh">返回列表</span><span class="lang-en">Back to List</span></a>
@@ -569,7 +585,6 @@
       <% } %>
     </div>
   <% } %>
-
   <footer class="footer">
     <div class="footer-inner">
       <div class="footer-col">
@@ -589,30 +604,36 @@
         <h4><span class="lang-zh">联系我们</span><span class="lang-en">Contact</span></h4>
         <% if (config && config.wa) { %><p>WhatsApp: <%= config.wa %></p><% } %>
         <% if (config && config.email) { %><p>Email: <%= config.email %></p><% } %>
-        <!-- 三个可配置圆形图标 -->
-        <div class="social-circles">
-          <% if (config && config.social1_img) { %>
-            <a href="<%= config.social1_url || '#' %>" target="_blank" rel="noopener" title="Link 1">
-              <img src="<%= config.social1_img %>" alt="">
-            </a>
-          <% } else { %>
-            <a href="#" class="placeholder" title="可在后台设置" onclick="return false;"><span>·</span></a>
+        <!-- 小圆形图标 + 下方输入框（无内容时完全不显示） -->
+        <% 
+          const hasSocial1 = config && config.social1_img;
+          const hasSocial2 = config && config.social2_img;
+          const hasSocial3 = config && config.social3_img;
+          const hasSocialText = config && config.social_text && String(config.social_text).trim();
+          const showSocialArea = hasSocial1 || hasSocial2 || hasSocial3 || hasSocialText;
+        %>
+        <% if (showSocialArea) { %>
+          <div class="social-circles">
+            <% if (hasSocial1) { %>
+              <a href="<%= config.social1_url || '#' %>" target="_blank" rel="noopener" title="Link 1">
+                <img src="<%= config.social1_img %>" alt="">
+              </a>
+            <% } %>
+            <% if (hasSocial2) { %>
+              <a href="<%= config.social2_url || '#' %>" target="_blank" rel="noopener" title="Link 2">
+                <img src="<%= config.social2_img %>" alt="">
+              </a>
+            <% } %>
+            <% if (hasSocial3) { %>
+              <a href="<%= config.social3_url || '#' %>" target="_blank" rel="noopener" title="Link 3">
+                <img src="<%= config.social3_img %>" alt="">
+              </a>
+            <% } %>
+          </div>
+          <% if (hasSocialText) { %>
+            <input type="text" class="social-input" value="<%= config.social_text %>" readonly>
           <% } %>
-          <% if (config && config.social2_img) { %>
-            <a href="<%= config.social2_url || '#' %>" target="_blank" rel="noopener" title="Link 2">
-              <img src="<%= config.social2_img %>" alt="">
-            </a>
-          <% } else { %>
-            <a href="#" class="placeholder" title="可在后台设置" onclick="return false;"><span>·</span></a>
-          <% } %>
-          <% if (config && config.social3_img) { %>
-            <a href="<%= config.social3_url || '#' %>" target="_blank" rel="noopener" title="Link 3">
-              <img src="<%= config.social3_img %>" alt="">
-            </a>
-          <% } else { %>
-            <a href="#" class="placeholder" title="可在后台设置" onclick="return false;"><span>·</span></a>
-          <% } %>
-        </div>
+        <% } %>
       </div>
       <div class="footer-col">
         <h4><span class="lang-zh">服务承诺</span><span class="lang-en">Promise</span></h4>
@@ -621,13 +642,11 @@
     </div>
     <div class="footer-bottom"><%= (config && config.copyright_text) ? config.copyright_text : '© AUTO PARTS FACTORY' %></div>
   </footer>
-
   <% if (config && config.wa) { %>
     <a href="https://wa.me/<%= config.wa.replace(/[^0-9]/g,'') %>" class="wa-float" target="_blank" aria-label="WhatsApp">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
     </a>
   <% } %>
-
   <script>
     // 语言切换
     (function(){
@@ -644,7 +663,6 @@
         btns.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
       }
     })();
-
     // 货币切换 + 自动换算
     (function(){
       const sel = document.getElementById('currencySelect');
@@ -673,7 +691,6 @@
       apply(sel.value);
       sel.addEventListener('change', function(){ apply(sel.value); });
     })();
-
     // 工厂轮播
     (function(){
       const slides = document.querySelectorAll('#factorySlider .slide');
