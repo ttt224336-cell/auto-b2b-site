@@ -1,0 +1,16 @@
+{
+  "name": "autoparts-b2b",
+  "version": "1.0.0",
+  "description": "汽配B2B完整系统",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "ejs": "^3.1.10",
+    "express": "^4.22.3",
+    "express-session": "^1.19.0",
+    "sqlite3": "^5.1.7"
+  }
+}
