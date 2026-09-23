@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%=product.part_no%> | Auto Spare Parts Factory</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, Helvetica, sans-serif;}
+        :root{
+            --main-dark:#0B2C58;
+            --accent-yellow:#F7D794;
+            --accent-blue:#22577A;
+            --light-bg:#f8f9fc;
+            --text-gray:#555;
+            --white:#ffffff;
+        }
+        body{background:var(--white);color:#333;line-height:1.7;}
+        .container{max-width:1240px;margin:0 auto;padding:0 20px;}
+        header{background:var(--main-dark);color:#fff;position:sticky;top:0;z-index:99;box-shadow:0 3px 10px rgba(0,0,0,0.12);}
+        .nav-wrap{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;}
+        .logo{font-size:22px;font-weight:bold;text-decoration:none;color:#fff;cursor:pointer;}
+        .header-right{display:flex;align-items:center;gap:24px;}
+        .lang-switch button{background:transparent;border:1px solid var(--accent-yellow);color:#fff;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:14px;}
+        nav ul{display:flex;gap:28px;list-style:none;}
+        nav a{color:#fff;text-decoration:none;font-size:15px;}
+        .mobile-menu{display:none;font-size:26px;}
+        .breadcrumb{padding:24px 0;background:var(--light-bg);font-size:14px;}
+        .breadcrumb a{color:var(--accent-blue);text-decoration:none;}
+        .product-detail-wrap{padding:70px 0;}
+        .detail-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:flex-start;}
+        .detail-img img{width:100%;border-radius:8px;object-fit:cover;}
+        .detail-info h1{font-size:30px;color:var(--main-dark);margin-bottom:14px;}
+        .oem-info{background:var(--light-bg);padding:14px;border-radius:6px;margin:18px 0;}
+        .spec-list{margin:24px 0;}
+        .spec-list li{list-style:none;padding:10px 0;border-bottom:1px solid #eee;}
+        .btn{display:inline-block;padding:15px 34px;background:linear-gradient(135deg,var(--accent-blue),var(--main-dark));color:#fff;text-decoration:none;border-radius:6px;font-size:16px;}
+        footer{background:var(--main-dark);color:#e2e6ee;padding:55px 0 30px;margin-top:60px;}
+        .foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:34px;margin-bottom:40px;}
+        .foot-col h4{color:var(--accent-yellow);margin-bottom:20px;font-size:18px;}
+        .foot-col p,.foot-col a{color:#cbd2e0;text-decoration:none;font-size:14px;line-height:1.9;}
+        .copyright{text-align:center;padding-top:24px;border-top:rgba(255,255,255,0.12) solid 1px;font-size:13px;color:#a2abc0;}
+        .float-whatsapp{position:fixed;bottom:26px;right:26px;z-index:98;}
+        .float-whatsapp a{display:flex;align-items:center;gap:9px;background:#25D366;color:#fff;padding:13px 20px;border-radius:50px;text-decoration:none;box-shadow:0 5px 14px rgba(0,0,0,0.22);font-weight:500;}
+        @media(max-width:768px){
+            .detail-row{grid-template-columns:1fr;gap:30px;}
+            nav ul{position:absolute;top:68px;left:0;width:100%;background:var(--main-dark);flex-direction:column;padding:24px;display:none;}
+            .mobile-menu{display:block;}
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container nav-wrap">
+            <a href="/" class="logo">AUTO PARTS FACTORY</a>
+            <div class="header-right">
+                <div class="lang-switch">
+                    <button id="btnEn">EN</button>
+                    <button id="btnCn">中文</button>
+                </div>
+                <nav>
+                    <div class="mobile-menu">☰</div>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/#products">Products</a></li>
+                        <li><a href="/#inquiry">Inquiry</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+    <div class="breadcrumb">
+        <div class="container">
+            <a href="/">Home</a>
+            <span> / </span>
+            <a href="/#products">Products</a>
+            <span> / </span>
+            <span><%=product.part_no%></span>
+        </div>
+    </div>
+    <section class="product-detail-wrap">
+        <div class="container">
+            <div class="detail-row">
+                <div class="detail-img">
+                    <% if(product.img_url){ %>
+                        <img src="<%=product.img_url%>" alt="<%=product.part_no%>" onerror="this.src='https://via.placeholder.com/600x500?text=No+Image'">
+                    <% }else{ %>
+                        <img src="https://via.placeholder.com/600x500?text=No+Image" alt="no image">
+                    <% } %>
+                </div>
+                <div class="detail-info">
+                    <h1><%= product.part_no %></h1>
+                    <div class="oem-info">
+                        <p><strong>Spec：</strong><%= product.spec||'N/A' %></p>
+                        <p><strong>Category：</strong><%= product.category_name||'Uncategorized' %></p>
+                    </div>
+                    <ul class="spec-list">
+                        <li><strong>Price:</strong> $<%= product.price||"Inquiry" %></li>
+                        <li><strong>Service:</strong> OEM,ODM,Private label</li>
+                        <li><strong>MOQ:</strong> Negotiable, support trial order</li>
+                    </ul>
+                    <p style="margin-bottom:24px;">
+                        High quality auto spare parts, strictly quality‑inspected before shipment. Welcome send inquiry for best wholesale price.
+                    </p>
+                    <a href="/#inquiry" class="btn">Get Quotation</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div class="container">
+            <div class="foot-grid">
+                <div class="foot-col">
+                    <h4>Company Info</h4>
+                    <p>China professional auto spare parts manufacturer, focus on B2B wholesale & export.</p>
+                </div>
+                <div class="foot-col">
+                    <h4>Contact Information</h4>
+                    <p>Email: ttt224336@gmail.com<br>WhatsApp: +852 64960641</p>
+                </div>
+            </div>
+            <div class="copyright">© 2026 Auto Parts Factory. All Rights Reserved.</div>
+        </div>
+    </footer>
+    <div class="float-whatsapp">
+        <a target="_blank" href="https://wa.me/85264960641">💬 WhatsApp</a>
+    </div>
+<script>
+const body = document.body;
+const btnEn = document.getElementById('btnEn');
+const btnCn = document.getElementById('btnCn');
+btnEn.onclick = ()=> body.classList.remove('cn');
+btnCn.onclick = ()=> body.classList.add('cn');
+</script>
+</body>
+</html>
