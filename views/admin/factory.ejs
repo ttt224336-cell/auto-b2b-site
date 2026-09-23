@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工厂展示 — AUTO PARTS FACTORY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:10px;}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+    body{background:var(--light);display:flex;min-height:100vh;color:#1F2937;}
+    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;}
+    .s-top{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .s-top h2{font-size:17px;font-weight:700;}
+    .s-top p{font-size:12px;opacity:.7;margin-top:4px;}
+    .s-menu{padding:16px 0;flex:1;}
+    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;}
+    .s-menu a:hover,.s-menu a.active{background:var(--blue);color:#fff;}
+    .s-bot{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
+    .s-bot a{color:#FCA5A5;font-size:13px;}
+    .main{flex:1;margin-left:220px;padding:24px;}
+    .top-bar{background:#fff;padding:16px 22px;border-radius:var(--r);margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .top-bar h1{font-size:18px;font-weight:600;color:var(--main);}
+    .btn{display:inline-block;padding:9px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;}
+    .btn-blue{background:var(--blue);color:#fff;}
+    .btn-green{background:#10B981;color:#fff;}
+    .card{background:#fff;border-radius:var(--r);padding:22px;margin-bottom:22px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .card h3{font-size:15px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--gray);color:var(--main);}
+    input,textarea{width:100%;padding:9px 12px;border:1px solid #D1D5DB;border-radius:7px;font-size:13px;margin-bottom:12px;outline:none;}
+    label{display:block;font-size:12px;font-weight:500;color:#4B5563;margin-bottom:5px;}
+    .ok{background:#ECFDF5;color:#065F46;padding:10px 14px;border-radius:7px;margin-bottom:16px;font-size:13px;}
+    .tip{font-size:11px;color:#9CA3AF;margin-top:-6px;margin-bottom:12px;}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="s-top">
+      <h2>管理后台</h2>
+      <p>欢迎，<%= admin.username %></p>
+    </div>
+    <nav class="s-menu">
+      <a href="/admin/product">📦 产品管理</a>
+      <a href="/admin/category">📁 分类管理</a>
+      <a href="/admin/factory" class="active">🏭 工厂展示</a>
+      <a href="/admin/inquiry">💬 客户询盘</a>
+      <a href="/admin/stats">📊 数据统计</a>
+      <a href="/admin/settings">⚙️ 系统设置</a>
+    </nav>
+    <div class="s-bot"><a href="/admin/logout">🚪 退出登录</a></div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <h1>🏭 工厂展示编辑</h1>
+      <a href="/" target="_blank" class="btn btn-blue">🌐 查看前台</a>
+    </div>
+
+    <% if(typeof saved !== 'undefined' && saved){ %>
+  <div class="ok">✅ 保存成功，前台已同步更新</div>
+<% } %>
+
+    <div class="card">
+      <h3>工厂内容编辑（修改后前台实时同步）</h3>
+      <form method="post" action="/admin/factory">
+        <label>标题（中文）</label>
+        <input type="text" name="title_zh" value="<%= content.title_zh || '' %>">
+
+        <label>标题（英文）</label>
+        <input type="text" name="title_en" value="<%= content.title_en || '' %>">
+
+        <label>简介（中文）</label>
+        <textarea name="intro_zh" rows="4"><%= content.intro_zh || '' %></textarea>
+
+        <label>简介（英文）</label>
+        <textarea name="intro_en" rows="3"><%= content.intro_en || '' %></textarea>
+
+        <label>优势列表（中文，每行一条）</label>
+        <textarea name="advantages_zh" rows="6" placeholder="精密智造 —— 自动化产线...&#10;严苛品控 —— 全检+抽样..."><%= content.advantages_zh || '' %></textarea>
+        <p class="tip">每行一条优势，前台会自动显示为列表</p>
+
+        <label>优势列表（英文）</label>
+        <textarea name="advantages_en" rows="5"><%= content.advantages_en || '' %></textarea>
+
+        <label>轮播图片链接（逗号分隔，建议尺寸 1200×675）</label>
+        <input type="text" name="images" value="<%= content.images || '' %>" placeholder="https://img1.jpg,https://img2.jpg,https://img3.jpg">
+        <p class="tip">建议使用 16:9 高清图，最多 5 张</p>
+
+        <button type="submit" class="btn btn-green">💾 保存并发布</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

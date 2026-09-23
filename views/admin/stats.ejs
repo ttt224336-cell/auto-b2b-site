@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据统计 — AUTO PARTS FACTORY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:10px;}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+    body{background:var(--light);display:flex;min-height:100vh;color:#1F2937;}
+    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;}
+    .s-top{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .s-top h2{font-size:17px;font-weight:700;}
+    .s-top p{font-size:12px;opacity:.7;margin-top:4px;}
+    .s-menu{padding:16px 0;flex:1;}
+    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;}
+    .s-menu a:hover,.s-menu a.active{background:var(--blue);color:#fff;}
+    .s-bot{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
+    .s-bot a{color:#FCA5A5;font-size:13px;}
+    .main{flex:1;margin-left:220px;padding:24px;}
+    .top-bar{background:#fff;padding:16px 22px;border-radius:var(--r);margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .top-bar h1{font-size:18px;font-weight:600;color:var(--main);}
+    .btn{display:inline-block;padding:9px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;}
+    .btn-blue{background:var(--blue);color:#fff;}
+    .card{background:#fff;border-radius:var(--r);padding:22px;margin-bottom:22px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .card h3{font-size:15px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--gray);color:var(--main);}
+    .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;}
+    .stat-card{background:linear-gradient(135deg,var(--main),var(--blue));color:#fff;padding:24px;border-radius:var(--r);text-align:center;}
+    .stat-num{font-size:32px;font-weight:700;}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="s-top">
+      <h2>管理后台</h2>
+      <p>欢迎，<%= admin.username %></p>
+    </div>
+    <nav class="s-menu">
+      <a href="/admin/product">📦 产品管理</a>
+      <a href="/admin/category">📁 分类管理</a>
+      <a href="/admin/factory">🏭 工厂展示</a>
+      <a href="/admin/inquiry">💬 客户询盘</a>
+      <a href="/admin/stats" class="active">📊 数据统计</a>
+      <a href="/admin/settings">⚙️ 系统设置</a>
+    </nav>
+    <div class="s-bot"><a href="/admin/logout">🚪 退出登录</a></div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <h1>📊 数据统计</h1>
+      <a href="/" target="_blank" class="btn btn-blue">🌐 查看前台</a>
+    </div>
+
+    <div class="card">
+      <h3>整体概览</h3>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-num"><%= totalCategory || 0 %></div>
+          <div>分类总数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><%= totalProduct || 0 %></div>
+          <div>产品总数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num"><%= pendingInquiry || 0 %></div>
+          <div>待处理询盘</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

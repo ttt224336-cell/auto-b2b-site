@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品管理 — AUTO PARTS FACTORY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:10px;}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+    body{background:var(--light);display:flex;min-height:100vh;color:#1F2937;}
+    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;}
+    .s-top{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .s-top h2{font-size:17px;font-weight:700;}
+    .s-top p{font-size:12px;opacity:.7;margin-top:4px;}
+    .s-menu{padding:16px 0;flex:1;}
+    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;transition:.15s;}
+    .s-menu a:hover,.s-menu a.active{background:var(--blue);color:#fff;}
+    .s-bot{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
+    .s-bot a{color:#FCA5A5;font-size:13px;}
+    .main{flex:1;margin-left:220px;padding:24px;}
+    .top-bar{background:#fff;padding:16px 22px;border-radius:var(--r);margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .top-bar h1{font-size:18px;font-weight:600;color:var(--main);}
+    .btn{display:inline-block;padding:9px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;transition:.15s;}
+    .btn-blue{background:var(--blue);color:#fff;}
+    .btn-blue:hover{background:#1858b8;}
+    .btn-green{background:#10B981;color:#fff;}
+    .btn-red{background:#EF4444;color:#fff;}
+    .btn-sm{padding:5px 12px;font-size:12px;}
+    .card{background:#fff;border-radius:var(--r);padding:22px;margin-bottom:22px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .card h3{font-size:15px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--gray);color:var(--main);}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th,td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--gray);}
+    th{background:#F8FAFC;font-weight:600;color:#4B5563;}
+    input,select,textarea{width:100%;padding:9px 12px;border:1px solid #D1D5DB;border-radius:7px;font-size:13px;margin-bottom:12px;outline:none;}
+    input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,107,217,.12);}
+    label{display:block;font-size:12px;font-weight:500;color:#4B5563;margin-bottom:5px;}
+    .row{display:flex;gap:14px;flex-wrap:wrap;}
+    .col{flex:1;min-width:180px;}
+    .search-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+    .search-row input{flex:1;min-width:200px;margin:0;}
+    .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+    .tag.on{background:#D1FAE5;color:#065F46;}
+    .tag.off{background:#FEE2E2;color:#991B1B;}
+    .ok{background:#ECFDF5;color:#065F46;padding:10px 14px;border-radius:7px;margin-bottom:16px;font-size:13px;}
+    .tip{font-size:11px;color:#9CA3AF;margin-top:-8px;margin-bottom:12px;}
+    @media(max-width:768px){.sidebar{width:180px;}.main{margin-left:180px;}.col{min-width:100%;}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="s-top">
+      <h2>管理后台</h2>
+      <p>欢迎，<%= admin.username %></p>
+    </div>
+    <nav class="s-menu">
+      <a href="/admin/product" class="<%= page==='product'?'active':'' %>">📦 产品管理</a>
+      <a href="/admin/category" class="<%= page==='category'?'active':'' %>">📁 分类管理</a>
+      <a href="/admin/factory" class="<%= page==='factory'?'active':'' %>">🏭 工厂展示</a>
+      <a href="/admin/inquiry" class="<%= page==='inquiry'?'active':'' %>">💬 客户询盘</a>
+      <a href="/admin/stats" class="<%= page==='stats'?'active':'' %>">📊 数据统计</a>
+      <a href="/admin/settings" class="<%= page==='settings'?'active':'' %>">⚙️ 系统设置</a>
+    </nav>
+    <div class="s-bot">
+      <a href="/admin/logout">🚪 退出登录</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top-bar">
+      <h1>📦 产品管理</h1>
+      <a href="/" target="_blank" class="btn btn-blue">🌐 查看前台</a>
+    </div>
+
+    <!-- 搜索 -->
+    <div class="card">
+      <form class="search-row" method="get" action="/admin/product">
+        <input type="text" name="q" placeholder="搜索名称 / OE / 车型..." value="<%= keyword || '' %>">
+        <select name="cat" onchange="this.form.submit()">
+          <option value="">全部分类</option>
+          <% categoryList.forEach(c => { %>
+            <option value="<%= c.id %>" <%= String(catId)===String(c.id)?'selected':'' %>><%= c.name_zh %></option>
+          <% }) %>
+        </select>
+        <select name="status" onchange="this.form.submit()">
+          <option value="">全部状态</option>
+          <option value="1" <%= statusFilter==='1'?'selected':'' %>>已上架</option>
+          <option value="0" <%= statusFilter==='0'?'selected':'' %>>已下架</option>
+        </select>
+        <button type="submit" class="btn btn-blue">搜索</button>
+        <% if(keyword || catId || statusFilter){ %><a href="/admin/product" class="btn">重置</a><% } %>
+      </form>
+    </div>
+
+    <!-- 添加产品 -->
+    <div class="card">
+      <h3>➕ 添加产品</h3>
+      <form method="post" action="/admin/product/add" id="addForm">
+        <div class="row">
+          <div class="col">
+            <label>所属分类</label>
+            <select name="category_id">
+              <option value="0">未分类</option>
+              <% categoryList.forEach(c => { %><option value="<%= c.id %>"><%= c.name_zh %></option><% }) %>
+            </select>
+          </div>
+          <div class="col">
+            <label>上架状态</label>
+            <select name="status">
+              <option value="1">立即上架</option>
+              <option value="0">暂存下架</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label>产品名称（中文）*</label>
+            <input type="text" name="name_zh" required>
+          </div>
+          <div class="col">
+            <label>产品名称（英文）</label>
+            <input type="text" name="name_en">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col"><label>OE 编号</label><input type="text" name="oe"></div>
+          <div class="col"><label>适用车型</label><input type="text" name="model"></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>价格 (HK$)</label><input type="number" step="0.01" name="price" value="0"></div>
+          <div class="col"><label>库存</label><input type="number" name="stock" value="999"></div>
+        </div>
+        <label>主图链接（建议尺寸 800×800）</label>
+        <input type="url" name="image" placeholder="https://...">
+        <p class="tip">建议上传正方形高清图，前台会自动适配</p>
+        <label>多图链接（逗号分隔）</label>
+        <input type="text" name="images" placeholder="url1,url2,url3">
+        <label>产品说明（中文）</label>
+        <textarea name="description_zh" rows="3"></textarea>
+        <label>产品说明（英文）</label>
+        <textarea name="description_en" rows="2"></textarea>
+        <div class="row">
+          <div class="col"><label>SEO 标题</label><input type="text" name="seo_title"></div>
+          <div class="col"><label>SEO 关键词</label><input type="text" name="seo_keywords"></div>
+        </div>
+        <label>SEO 描述</label>
+        <textarea name="seo_desc" rows="2"></textarea>
+        <button type="submit" class="btn btn-green" id="addBtn">✅ 添加产品</button>
+      </form>
+    </div>
+
+    <!-- 产品列表 -->
+    <div class="card">
+      <h3>产品列表（共 <%= productList.length %> 条）</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>名称</th>
+            <th>OE</th>
+            <th>分类</th>
+            <th>价格</th>
+            <th>库存</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!productList.length) { %>
+            <tr><td colspan="8" style="text-align:center;color:#9CA3AF;padding:40px;">暂无产品，请先添加</td></tr>
+          <% } %>
+          <% productList.forEach(p => { %>
+            <tr>
+              <td><%= p.id %></td>
+              <td><%= p.name_zh %></td>
+              <td><%= p.oe || '-' %></td>
+              <td><%= p.cat_name || '未分类' %></td>
+              <td>HK$<%= Number(p.price||0).toFixed(2) %></td>
+              <td><%= p.stock %></td>
+              <td><span class="tag <%= p.status==1?'on':'off' %>"><%= p.status==1?'上架':'下架' %></span></td>
+              <td>
+                <a href="#edit<%= p.id %>" class="btn btn-sm btn-blue" onclick="document.getElementById('e<%= p.id %>').style.display='table-row'">编辑</a>
+                <a href="/admin/product/del/<%= p.id %>" class="btn btn-sm btn-red" onclick="return confirm('确定删除此产品？')">删除</a>
+              </td>
+            </tr>
+            <tr id="e<%= p.id %>" style="display:none;background:#F0F9FF;">
+              <td colspan="8">
+                <form method="post" action="/admin/product/edit/<%= p.id %>" style="padding:16px;">
+                  <div class="row">
+                    <div class="col">
+                      <label>分类</label>
+                      <select name="category_id">
+                        <option value="0">未分类</option>
+                        <% categoryList.forEach(c => { %>
+                          <option value="<%= c.id %>" <%= String(c.id)===String(p.category_id)?'selected':'' %>><%= c.name_zh %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+                    <div class="col">
+                      <label>状态</label>
+                      <select name="status">
+                        <option value="1" <%= p.status==1?'selected':'' %>>上架</option>
+                        <option value="0" <%= p.status==0?'selected':'' %>>下架</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col"><label>名称（中）</label><input type="text" name="name_zh" value="<%= p.name_zh %>" required></div>
+                    <div class="col"><label>名称（英）</label><input type="text" name="name_en" value="<%= p.name_en||'' %>"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col"><label>OE</label><input type="text" name="oe" value="<%= p.oe||'' %>"></div>
+                    <div class="col"><label>车型</label><input type="text" name="model" value="<%= p.model||'' %>"></div>
+                  </div>
+                  <div class="row">
+                    <div class="col"><label>价格</label><input type="number" step="0.01" name="price" value="<%= p.price %>"></div>
+                    <div class="col"><label>库存</label><input type="number" name="stock" value="<%= p.stock %>"></div>
+                  </div>
+                  <label>主图</label><input type="url" name="image" value="<%= p.image||'' %>">
+                  <label>多图</label><input type="text" name="images" value="<%= p.images||'' %>">
+                  <label>说明（中）</label><textarea name="description_zh" rows="2"><%= p.description_zh||'' %></textarea>
+                  <label>说明（英）</label><textarea name="description_en" rows="2"><%= p.description_en||'' %></textarea>
+                  <button type="submit" class="btn btn-green">保存修改</button>
+                  <button type="button" class="btn" onclick="document.getElementById('e<%= p.id %>').style.display='none'">取消</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('addForm')?.addEventListener('submit', function() {
+      const btn = document.getElementById('addBtn');
+      btn.disabled = true;
+      btn.textContent = '提交中...';
+    });
+  </script>
+</body>
+</html>

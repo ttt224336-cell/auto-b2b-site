@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>汽配B2B后台管理中心</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",Arial,sans-serif;}
+    :root{--main-dark:#0B2C58;--accent-yellow:#F7D794;--accent-blue:#22577A;--light-bg:#f8f9fc;--white:#fff;--gray:#e5e7eb;--muted:#6b7280;}
+    body{display:flex;min-height:100vh;background:#f0f2f5;}
+    .sidebar{width:240px;background:var(--main-dark);color:#fff;display:flex;flex-direction:column;box-shadow:2px 0 8px rgba(0,0,0,.1);}
+    .sidebar h1{padding:24px 20px;font-size:18px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-menu{flex:1;padding:20px 12px;}
+    .sidebar-menu a{display:flex;align-items:center;gap:10px;padding:12px 16px;margin-bottom:6px;color:#cbd2e0;text-decoration:none;border-radius:6px;transition:.25s;}
+    .sidebar-menu a:hover,.sidebar-menu a.active{background:var(--accent-blue);color:#fff;}
+    .sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
+    .main{flex:1;display:flex;flex-direction:column;}
+    .top-bar{background:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06);flex-wrap:wrap;gap:10px;}
+    .top-bar-left{display:flex;align-items:center;gap:16px;}
+    .top-bar-title{font-size:16px;font-weight:600;color:var(--main-dark);}
+    .btn-front{background:var(--accent-blue);color:#fff;padding:8px 16px;border-radius:6px;text-decoration:none;font-size:14px;transition:.25s;display:inline-flex;align-items:center;gap:6px;}
+    .btn-front:hover{background:#1a4563;transform:translateY(-1px);}
+    .top-bar-right{font-size:14px;color:#555;}
+    .content{flex:1;padding:24px;overflow-y:auto;}
+    .card{background:#fff;border-radius:10px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+    .card h3{margin-bottom:20px;color:var(--main-dark);font-size:18px;padding-bottom:10px;border-bottom:2px solid var(--accent-yellow);}
+    .card h4{font-size:15px;color:#333;margin:24px 0 12px;padding-bottom:6px;border-bottom:1px dashed #ddd;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px;}
+    .form-item{margin-bottom:18px;}
+    label{display:block;margin:0 0 4px;font-weight:600;font-size:14px;color:#333;}
+    .form-hint{font-size:12px;color:var(--muted);margin-bottom:6px;line-height:1.5;background:#f3f4f6;padding:6px 10px;border-radius:4px;}
+    input,textarea,select{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:14px;}
+    input:focus,textarea:focus{outline:none;border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(34,87,122,.1);}
+    textarea{resize:vertical;min-height:80px;}
+    .btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:.2s;}
+    .btn-primary{background:var(--accent-blue);color:#fff;}
+    .btn-primary:hover{background:#1a4563;}
+    .btn-light{background:#e5e7eb;color:#333;margin-left:8px;}
+    .btn-light:hover{background:#d1d5db;}
+    .btn-block{width:100%;font-size:16px;padding:12px;margin-top:10px;}
+    .preview-img{max-width:120px;margin-top:8px;border-radius:6px;border:1px solid #eee;}
+    .success{color:green;margin-bottom:16px;padding:12px;background:#f0fdf4;border-radius:6px;}
+    .row{display:flex;gap:16px;flex-wrap:wrap;}
+    .row .form-item{flex:1;min-width:240px;}
+    table{width:100%;border-collapse:collapse;margin-top:12px;}
+    table th,table td{padding:10px;border:1px solid #eee;text-align:left;}
+    .btn-sm{display:inline-block;padding:6px 12px;background:var(--accent-blue);color:#fff;border-radius:4px;text-decoration:none;margin:0 4px;font-size:13px;}
+    .btn-del{background:#dc3545;}
+  </style>
+</head>
+<body>
+  <!-- 左侧菜单 -->
+  <div class="sidebar">
+    <h1>汽配B2B管理中心</h1>
+    <nav class="sidebar-menu">
+      <a href="/admin" class="<%= activeMenu==='dashboard'?'active':'' %>">📊 控制台</a>
+      <a href="/admin/category" class="<%= activeMenu==='category'?'active':'' %>">📁 分类管理</a>
+      <a href="/admin/product" class="<%= activeMenu==='product'?'active':'' %>">📦 产品管理</a>
+      <a href="/admin/stats" class="<%= activeMenu==='stats'?'active':'' %>">📈 数据统计</a>
+      <a href="/admin/settings" class="<%= activeMenu==='settings'?'active':'' %>">⚙️ 系统设置</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/" target="_blank" style="color:#cbd2e0;text-decoration:none;display:block;margin-bottom:10px;">🔗 查看前台</a>
+      <a href="/admin/logout" style="color:#f79b9b;text-decoration:none;">🚪 退出登录</a>
+    </div>
+  </div>
+
+  <!-- 右侧主内容 -->
+  <div class="main">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <span class="top-bar-title">欢迎回来，<strong><%= admin.username %></strong></span>
+        <span>｜</span>
+        <span>当前站点：<strong><%= config.site_name || 'AUTO PARTS FACTORY' %></strong></span>
+        <a href="/" target="_blank" class="btn-front">🌐 查看前台</a>
+      </div>
+      <div class="top-bar-right">最后登录：<%= new Date().toLocaleString('zh-CN') %></div>
+    </div>
+    <div class="content">
+      <% if(content==='index'){ %>
+        <div class="grid">
+          <div class="stat-card">
+            <h3><%= totalCategory %></h3>
+            <p>产品分类</p>
+          </div>
+          <div class="stat-card">
+            <h3><%= totalProduct %></h3>
+            <p>上架产品</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+          <p>从左侧菜单选择管理项开始操作。</p>
+        </div>
+      <% }else if(content==='category'){ %>
+        <div class="card">
+          <h3>新增分类</h3>
+          <form method="post" action="/admin/category/add">
+            <div class="form-item">
+              <label>分类名称</label>
+              <p class="form-hint">前台「产品中心」按此名称分组展示产品</p>
+              <input type="text" name="name" required placeholder="例如：发动机配件">
+            </div>
+            <button type="submit" class="btn btn-primary">添加分类</button>
+          </form>
+        </div>
+        <div class="card">
+          <h3>分类列表</h3>
+          <table>
+            <tr><th>ID</th><th>名称</th><th>操作</th></tr>
+            <% list.forEach(row=>{ %>
+              <tr>
+                <td><%= row.id %></td>
+                <td><%= row.name %></td>
+                <td><a href="/admin/category/del/<%= row.id %>" class="btn-sm btn-del" onclick="return confirm('确定删除？关联产品不会删除')">删除</a></td>
+              </tr>
+            <% }) %>
+          </table>
+        </div>
+      <% }else if(content==='product'){ %>
+        <div class="card">
+          <h3>新增产品</h3>
+          <form method="post" action="/admin/product/add">
+            <div class="form-item">
+              <label>产品名称 *</label>
+              <p class="form-hint">前台卡片主标题，简洁清晰</p>
+              <input type="text" name="name" required>
+            </div>
+            <div class="form-item">
+              <label>所属分类 *</label>
+              <p class="form-hint">选择产品归属，前台按分类分组显示</p>
+              <select name="category_id" required>
+                <% categoryList.forEach(c=>{ %>
+                  <option value="<%= c.id %>"><%= c.name %></option>
+                <% }) %>
+              </select>
+            </div>
+            <div class="row">
+              <div class="form-item">
+                <label>OEM编号</label>
+                <p class="form-hint">显示在卡片OEM处，方便客户匹配型号</p>
+                <input type="text" name="oe" placeholder="例如：123456">
+              </div>
+              <div class="form-item">
+                <label>适用车型</label>
+                <p class="form-hint">写明适配车型/年份，提升询盘精准度</p>
+                <input type="text" name="model" placeholder="例如：丰田花冠 2008-2013">
+              </div>
+            </div>
+            <div class="form-item">
+              <label>参考价格 ($)</label>
+              <p class="form-hint">仅作展示，可填0或留空不显示</p>
+              <input type="number" step="0.01" name="price" placeholder="123.00">
+            </div>
+            <div class="form-item">
+              <label>产品图片URL</label>
+              <p class="form-hint">上传图片→复制地址填入；建议比例 4:3，尺寸≥600px宽更清晰</p>
+              <input type="text" name="image" id="prodImg">
+              <button type="button" class="btn btn-light" onclick="uploadFile('prodImg')">📁 上传图片</button>
+            </div>
+            <div class="form-item">
+              <label>产品描述</label>
+              <p class="form-hint">补充材质/规格/包装等信息，鼠标悬停可滚动查看</p>
+              <textarea name="description" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:10px;">添加产品</button>
+          </form>
+        </div>
+        <div class="card">
+          <h3>产品列表 (<%= productList.length %>)</h3>
+          <table>
+            <tr><th>名称</th><th>分类</th><th>OEM</th><th>价格</th><th>操作</th></tr>
+            <% productList.forEach(p=>{ %>
+              <tr>
+                <td><%= p.name %></td>
+                <td><%= (categoryList.find(c=>c.id===p.category_id)||{}).name || '-' %></td>
+                <td><%= p.oe || '-' %></td>
+                <td><%= p.price?'$'+p.price:'-' %></td>
+                <td><a href="/admin/product/del/<%= p.id %>" class="btn-sm btn-del" onclick="return confirm('确定删除？不可恢复')">删除</a></td>
+              </tr>
+            <% }) %>
+          </table>
+        </div>
+      <% }else if(content==='stats'){ %>
+        <div class="grid" style="margin-bottom:20px;">
+          <div class="stat-card"><h3><%= totalCategory %></h3><p>分类总数</p></div>
+          <div class="stat-card"><h3><%= totalProduct %></h3><p>产品总数</p></div>
+          <div class="stat-card"><h3><%= avgPerCategory %></h3><p>平均每类产品数</p></div>
+        </div>
+        <div class="card">
+          <h3>分类产品分布</h3>
+          <% if(categoryStats.length===0){ %>
+            <p>暂无数据</p>
+          <% }else{ %>
+            <table>
+              <tr><th>分类</th><th>产品数</th><th>占比</th></tr>
+              <% categoryStats.forEach(s=>{ %>
+                <tr>
+                  <td><%= s.name %></td>
+                  <td><%= s.count %></td>
+                  <td><%= s.percent %>%</td>
+                </tr>
+              <% }) %>
+            </table>
+          <% } %>
+        </div>
+      <% }else if(content==='settings'){ %>
+        <% if(saved){ %><p class="success">✅ 保存成功！可点右上角「🌐 查看前台」核对效果</p><% } %>
+        <form method="post" action="/admin/settings">
+          <div class="grid">
+            <!-- 第一列：基础信息 -->
+            <div class="card" style="margin:0;">
+              <h3>🏠 基础信息</h3>
+              <div class="form-item">
+                <label>网站名称</label>
+                <p class="form-hint">左上角主标题 + 浏览器标签页标题</p>
+                <input type="text" name="site_name" value="<%= config.site_name || '' %>">
+              </div>
+              <div class="form-item">
+                <label>公司Logo</label>
+                <p class="form-hint">左上角显示；建议 120×50px，透明背景PNG更佳</p>
+                <input type="text" name="company_logo" id="logoUrl" value="<%= config.company_logo || '' %>">
+                <button type="button" class="btn btn-light" onclick="uploadFile('logoUrl')">📁 上传Logo</button>
+                <% if(config.company_logo){ %><img src="<%= config.company_logo %>" class="preview-img" alt="预览"><% } %>
+              </div>
+              <div class="form-item">
+                <label>首页Banner背景图</label>
+                <p class="form-hint">顶部大横幅背景；建议 1920×600px，内容居中避开边缘</p>
+                <input type="text" name="banner_bg" id="bannerUrl" value="<%= config.banner_bg || '' %>">
+                <button type="button" class="btn btn-light" onclick="uploadFile('bannerUrl')">📁 上传背景</button>
+                <% if(config.banner_bg){ %><img src="<%= config.banner_bg %>" class="preview-img" alt="预览"><% } %>
+              </div>
+            </div>
+
+            <!-- 第二列：关于我们背景图 -->
+            <div class="card" style="margin:0;">
+              <h3>🖼️ 关于我们 — 四块背景图</h3>
+              <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">对应「为什么选择我们」四块卡片背景；建议 600×400px，淡雅低饱和度更协调</p>
+              <% [1,2,3,4].forEach(i=>{ %>
+                <div class="form-item">
+                  <label>第<%= i %>块背景图</label>
+                  <p class="form-hint">第<%= i %>张卡片背景；过亮会影响文字阅读，建议图上加半透明蒙版</p>
+                  <input type="text" name="about_bg<%= i %>" id="abg<%= i %>" value="<%= config['about_bg'+i] || '' %>">
+                  <button type="button" class="btn btn-light" onclick="uploadFile('abg<%= i %>')">📁 上传</button>
+                  <% if(config['about_bg'+i]){ %><img src="<%= config['about_bg'+i] %>" class="preview-img" alt="预览"><% } %>
+                </div>
+              <% }) %>
+            </div>
+
+            <!-- 第三列：联系信息 -->
+            <div class="card" style="margin:0;">
+              <h3>📞 联系与公司信息</h3>
+              <div class="form-item">
+                <label>公司名称</label>
+                <p class="form-hint">页面底部左侧显示</p>
+                <input type="text" name="company_name" value="<%= config.company_name || '' %>">
+              </div>
+              <div class="form-item">
+                <label>公司简介</label>
+                <p class="form-hint">底部公司名下方简短介绍</p>
+                <textarea name="company_intro" rows="3"><%= config.company_intro || '' %></textarea>
+              </div>
+              <div class="form-item">
+                <label>联系邮箱</label>
+                <p class="form-hint">联系我们处显示，点击可直接发邮件</p>
+                <input type="email" name="contact_email" value="<%= config.contact_email || '' %>">
+              </div>
+              <div class="form-item">
+                <label>WhatsApp</label>
+                <p class="form-hint">含国家区号，如 +852 64960641</p>
+                <input type="text" name="contact_whatsapp" value="<%= config.contact_whatsapp || '' %>">
+              </div>
+              <div class="form-item">
+                <label>版权文字</label>
+                <p class="form-hint">页面最底部居中显示</p>
+                <input type="text" name="copyright_text" value="<%= config.copyright_text || '' %>">
+              </div>
+            </div>
+
+            <!-- 第四列：社交图标 -->
+            <div class="card" style="margin:0;">
+              <h3>🔗 底部社交图标</h3>
+              <p style="color:var(--muted);font-size:13px;margin-bottom:16px;">页面底部「关注我们」区域；图标建议 80×80px 方形清晰</p>
+              <% [1,2,3,4].forEach(i=>{ %>
+                <div style="padding:12px;background:#f9f9f9;border-radius:8px;margin-bottom:12px;">
+                  <p style="font-weight:600;margin-bottom:8px;">图标<%= i %></p>
+                  <div class="form-item" style="margin-bottom:8px;">
+                    <label style="font-weight:normal;">图片地址</label>
+                    <input type="text" name="icon<%= i %>_url" id="icon<%= i %>url" value="<%= config['icon'+i+'_url'] || '' %>">
+                    <button type="button" class="btn btn-light" style="padding:4px 10px;font-size:12px;" onclick="uploadFile('icon<%= i %>url')">📁 上传</button>
+                    <% if(config['icon'+i+'_url']){ %><img src="<%= config['icon'+i+'_url'] %>" class="preview-img" alt="预览"><% } %>
+                  </div>
+                  <div class="form-item" style="margin-bottom:0;">
+                    <label style="font-weight:normal;">跳转链接</label>
+                    <input type="text" name="icon<%= i %>_link" value="<%= config['icon'+i+'_link'] || '' %>" placeholder="https://...">
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">💾 保存所有设置</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    function uploadFile(inputId){
+      const inp = document.createElement('input');
+      inp.type='file';
+      inp.accept='image/*';
+      inp.onchange=()=>{
+        const fd=new FormData();
+        fd.append('file',inp.files[0]);
+        fetch('/admin/upload',{method:'POST',body:fd})
+          .then(r=>r.json()).then(d=>{
+            document.getElementById(inputId).value=d.url;
+            alert('✅ 上传成功！地址已自动填入');
+          }).catch(()=>alert('❌ 上传失败，请重试'));
+      };
+      inp.click();
+    }
+  </script>
+</body>
+</html>

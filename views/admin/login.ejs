@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 — AUTO PARTS FACTORY</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main: #0A2F5F;
+      --blue: #1E6BD9;
+      --accent: #F59E0B;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+    body {
+      min-height:100vh;
+      background: linear-gradient(135deg, #0A2F5F 0%, #1E6BD9 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .box {
+      background:#fff;
+      width:100%;
+      max-width:420px;
+      border-radius:16px;
+      padding:40px 36px;
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+    }
+    .logo { text-align:center; margin-bottom:28px; }
+    .logo h1 { font-size:22px; color:var(--main); font-weight:700; }
+    .logo p { font-size:13px; color:#6B7280; margin-top:6px; }
+
+    label {
+      display:block;
+      font-size:13px;
+      font-weight:500;
+      color:#374151;
+      margin-bottom:6px;
+    }
+    .input-wrap {
+      position:relative;
+      margin-bottom:18px;
+    }
+    input {
+      width:100%;
+      padding:12px 14px;
+      border:1px solid #E5E7EB;
+      border-radius:8px;
+      font-size:14px;
+      outline:none;
+      transition:.2s;
+    }
+    input:focus {
+      border-color:var(--blue);
+      box-shadow:0 0 0 3px rgba(30,107,217,.15);
+    }
+    /* 密码眼睛 */
+    .eye-btn {
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      background:none;
+      border:none;
+      cursor:pointer;
+      color:#9CA3AF;
+      font-size:16px;
+      padding:4px;
+    }
+    .eye-btn:hover { color:var(--blue); }
+
+    /* 验证码区域 */
+    .captcha-row {
+      display:flex;
+      gap:10px;
+      margin-bottom:18px;
+      align-items:center;
+    }
+    .captcha-row input {
+      flex:1;
+      margin-bottom:0;
+    }
+    .captcha-box {
+      width:110px;
+      height:42px;
+      background:#F3F4F6;
+      border-radius:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      font-weight:700;
+      letter-spacing:3px;
+      color:var(--main);
+      cursor:pointer;
+      user-select:none;
+      border:1px solid #E5E7EB;
+      transition:.2s;
+    }
+    .captcha-box:hover {
+      background:#E5E7EB;
+    }
+    .captcha-box span {
+      font-family:monospace;
+    }
+
+    button.login-btn {
+      width:100%;
+      padding:13px;
+      background:var(--main);
+      color:#fff;
+      border:none;
+      border-radius:8px;
+      font-size:15px;
+      font-weight:600;
+      cursor:pointer;
+      transition:.2s;
+    }
+    button.login-btn:hover { background:#08305a; }
+
+    .error {
+      background:#FEF2F2;
+      color:#DC2626;
+      padding:10px 14px;
+      border-radius:8px;
+      font-size:13px;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    .success {
+      background:#ECFDF5;
+      color:#065F46;
+      padding:10px 14px;
+      border-radius:8px;
+      font-size:13px;
+      margin-bottom:18px;
+      text-align:center;
+    }
+
+    .change-pwd-link {
+      text-align:center;
+      margin-top:18px;
+      font-size:13px;
+    }
+    .change-pwd-link a {
+      color:var(--blue);
+      text-decoration:none;
+      cursor:pointer;
+    }
+    .change-pwd-link a:hover { text-decoration:underline; }
+
+    /* 修改密码弹窗 */
+    .modal-mask {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.45);
+      z-index:100;
+      align-items:center;
+      justify-content:center;
+    }
+    .modal-mask.show { display:flex; }
+    .modal {
+      background:#fff;
+      width:90%;
+      max-width:380px;
+      border-radius:14px;
+      padding:28px 24px;
+      box-shadow:0 20px 50px rgba(0,0,0,.2);
+    }
+    .modal h3 {
+      font-size:17px;
+      color:var(--main);
+      margin-bottom:20px;
+      text-align:center;
+    }
+    .modal .btn-row {
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+    }
+    .modal .btn-row button {
+      flex:1;
+      padding:11px;
+      border-radius:8px;
+      border:none;
+      font-size:14px;
+      font-weight:500;
+      cursor:pointer;
+    }
+    .btn-cancel { background:#F3F4F6; color:#374151; }
+    .btn-confirm { background:var(--main); color:#fff; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="logo">
+      <h1>AUTO PARTS FACTORY</h1>
+      <p>管理后台登录</p>
+    </div>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="error"><%= error %></div>
+    <% } %>
+    <% if (typeof success !== 'undefined' && success) { %>
+      <div class="success"><%= success %></div>
+    <% } %>
+
+    <!-- 登录表单 -->
+    <form method="post" action="/admin/login" id="loginForm">
+      <label>账号</label>
+      <div class="input-wrap">
+        <input type="text" name="username" id="username" placeholder="输入账号" required autocomplete="username">
+      </div>
+
+      <label>密码</label>
+      <div class="input-wrap">
+        <input type="password" name="password" id="password" placeholder="输入密码" required autocomplete="current-password">
+        <button type="button" class="eye-btn" id="eyeBtn" title="显示/隐藏密码">👁</button>
+      </div>
+
+      <label>验证码</label>
+      <div class="captcha-row">
+        <input type="text" name="captcha" id="captchaInput" placeholder="输入验证码" required maxlength="4" autocomplete="off">
+        <div class="captcha-box" id="captchaBox" title="点击刷新验证码">
+          <span id="captchaText">A3B7</span>
+        </div>
+      </div>
+
+      <button type="submit" class="login-btn">登 录</button>
+    </form>
+
+    <div class="change-pwd-link">
+      <a href="javascript:void(0)" id="openChangePwd">修改密码</a>
+    </div>
+  </div>
+
+  <!-- 修改密码弹窗 -->
+  <div class="modal-mask" id="pwdModal">
+    <div class="modal">
+      <h3>修改密码</h3>
+      <form id="changePwdForm">
+        <label>当前密码</label>
+        <div class="input-wrap">
+          <input type="password" id="oldPwd" placeholder="输入当前密码" required>
+        </div>
+        <label>新密码</label>
+        <div class="input-wrap">
+          <input type="password" id="newPwd" placeholder="输入新密码（至少6位）" required minlength="6">
+        </div>
+        <label>确认新密码</label>
+        <div class="input-wrap">
+          <input type="password" id="confirmPwd" placeholder="再次输入新密码" required minlength="6">
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn-cancel" id="closeModal">取消</button>
+          <button type="submit" class="btn-confirm">确认修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ========== 验证码 ==========
+    function generateCaptcha() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 4; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById('captchaText').textContent = code;
+      return code;
+    }
+
+    let currentCaptcha = generateCaptcha();
+
+    document.getElementById('captchaBox').addEventListener('click', function() {
+      currentCaptcha = generateCaptcha();
+    });
+
+    // ========== 密码显示/隐藏 ==========
+    const eyeBtn = document.getElementById('eyeBtn');
+    const pwdInput = document.getElementById('password');
+    eyeBtn.addEventListener('click', function() {
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        eyeBtn.textContent = '🙈';
+      } else {
+        pwdInput.type = 'password';
+        eyeBtn.textContent = '👁';
+      }
+    });
+
+    // ========== 登录表单验证码校验 ==========
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      const inputCode = document.getElementById('captchaInput').value.trim().toUpperCase();
+      if (inputCode !== currentCaptcha) {
+        e.preventDefault();
+        alert('验证码错误，请重新输入');
+        currentCaptcha = generateCaptcha();
+        document.getElementById('captchaInput').value = '';
+        document.getElementById('captchaInput').focus();
+      }
+    });
+
+    // ========== 修改密码弹窗 ==========
+    const modal = document.getElementById('pwdModal');
+    document.getElementById('openChangePwd').addEventListener('click', () => {
+      modal.classList.add('show');
+    });
+    document.getElementById('closeModal').addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('show');
+    });
+
+    // 修改密码提交
+    document.getElementById('changePwdForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const oldPwd = document.getElementById('oldPwd').value;
+      const newPwd = document.getElementById('newPwd').value;
+      const confirmPwd = document.getElementById('confirmPwd').value;
+
+      if (newPwd !== confirmPwd) {
+        alert('两次输入的新密码不一致');
+        return;
+      }
+      if (newPwd.length < 6) {
+        alert('新密码至少6位');
+        return;
+      }
+
+      // 发送到后端
+      fetch('/admin/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPassword: oldPwd, newPassword: newPwd })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('密码修改成功，请使用新密码登录');
+          modal.classList.remove('show');
+          document.getElementById('changePwdForm').reset();
+        } else {
+          alert(data.message || '修改失败');
+        }
+      })
+      .catch(() => alert('网络错误，请稍后重试'));
+    });
+  </script>
+</body>
+</html>
