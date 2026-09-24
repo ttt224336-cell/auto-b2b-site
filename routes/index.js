@@ -5,11 +5,31 @@ const db = require('../db');
 function getConfig(cb) {
   db.all('SELECT * FROM config', [], (e, rows) => {
     const config = {};
-    (rows || []).forEach(row => config[row.key] = row.value);
+    (rows || []).forEach(row => { config[row.key] = row.value; });
     config.wa = config.contact_whatsapp || '+85264960641';
     config.email = config.contact_email || '';
     cb(config);
   });
+}
+
+function safeRender(res, data) {
+  const base = {
+    page: 'list',
+    categories: [],
+    products: [],
+    product: null,
+    keyword: '',
+    catId: '',
+    sort: 'date',
+    config: res.locals.config || {},
+    factory: {}
+  };
+  try {
+    res.render('frontend/index', Object.assign(base, data));
+  } catch (e) {
+    console.error('render error', e);
+    res.status(500).send('页面渲染失败');
+  }
 }
 
 r.get('/', (req, res) => {
@@ -22,7 +42,7 @@ r.get('/', (req, res) => {
 
   if (q) {
     w += ' AND (name_zh LIKE ? OR name_en LIKE ? OR oe LIKE ? OR model LIKE ?)';
-    p.push(`%${q}%`, `%${q}%`, `%${q}%`, `%${q}%`);
+    p.push('%' + q + '%', '%' + q + '%', '%' + q + '%', '%' + q + '%');
   }
   if (cat) {
     w += ' AND category_id = ?';
@@ -33,9 +53,9 @@ r.get('/', (req, res) => {
 
   getConfig(config => {
     db.all('SELECT * FROM categories WHERE status=1 ORDER BY sort_order, id', [], (e, cats) => {
-      db.all(`SELECT * FROM products WHERE ${w} ORDER BY ${o}`, p, (e2, prods) => {
+      db.all('SELECT * FROM products WHERE ' + w + ' ORDER BY ' + o, p, (e2, prods) => {
         db.get('SELECT * FROM factory_content WHERE id=1', [], (e3, factory) => {
-          res.render('frontend/index', {
+          safeRender(res, {
             page: 'list',
             categories: cats || [],
             products: prods || [],
@@ -43,7 +63,7 @@ r.get('/', (req, res) => {
             catId: cat,
             keyword: q,
             sort: s,
-            config,
+            config: config,
             factory: factory || {}
           });
         });
@@ -56,15 +76,22 @@ r.get('/product/:id', (req, res) => {
   getConfig(config => {
     db.get('SELECT * FROM products WHERE id=? AND status=1', [req.params.id], (e, p) => {
       db.all('SELECT * FROM categories WHERE status=1 ORDER BY sort_order, id', [], (e2, cats) => {
-        res.render('frontend/index', {
+        if (!p) {
+          return safeRender(res, {
+            page: 'list',
+            categories: cats || [],
+            products: [],
+            product: null,
+            config: config,
+            factory: {}
+          });
+        }
+        safeRender(res, {
           page: 'detail',
           categories: cats || [],
           products: [],
-          product: p || null,
-          catId: '',
-          keyword: '',
-          sort: 'date',
-          config,
+          product: p,
+          config: config,
           factory: {}
         });
       });
@@ -72,13 +99,15 @@ r.get('/product/:id', (req, res) => {
   });
 });
 
-// 前台询盘提交
 r.post('/inquiry', (req, res) => {
-  const { product_id, product_name, name, email, whatsapp, message } = req.body;
+  const b = req.body || {};
   db.run(
-    `INSERT INTO inquiries (product_id, product_name, name, email, whatsapp, message) VALUES (?,?,?,?,?,?)`,
-    [product_id || null, product_name || '', name || '', email || '', whatsapp || '', message || ''],
-    () => res.json({ success: true, message: '询盘已提交，我们会尽快联系您' })
+    'INSERT INTO inquiries (product_id, product_name, name, email, whatsapp, message) VALUES (?,?,?,?,?,?)',
+    [b.product_id || null, b.product_name || '', b.name || '', b.email || '', b.whatsapp || '', b.message || ''],
+    function (err) {
+      if (err) return res.json({ success: false, message: '提交失败' });
+      res.json({ success: true, message: '询盘已提交' });
+    }
   );
 });
 
