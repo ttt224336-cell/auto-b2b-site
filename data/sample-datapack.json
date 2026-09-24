@@ -1,0 +1,104 @@
+{
+  "version": "2.0",
+  "exported_at": "2026-09-24T01:00:00.000Z",
+  "description": "汽配B2B示例数据包 - 含分类、产品参数、工厂展示、系统配置。一键导入即可展示完整产品。",
+  "categories": [
+    { "id": 1, "name_zh": "刹车系统", "name_en": "Brake System", "sort_order": 1, "status": 1, "bg_image": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1200&q=80" },
+    { "id": 2, "name_zh": "滤清器", "name_en": "Filters", "sort_order": 2, "status": 1, "bg_image": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80" },
+    { "id": 3, "name_zh": "点火系统", "name_en": "Ignition System", "sort_order": 3, "status": 1, "bg_image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=80" },
+    { "id": 4, "name_zh": "悬挂减震", "name_en": "Suspension", "sort_order": 4, "status": 1, "bg_image": "https://images.unsplash.com/photo-1553448560-12d8c2e8e0f0?w=1200&q=80" },
+    { "id": 5, "name_zh": "电气配件", "name_en": "Electrical Parts", "sort_order": 5, "status": 1, "bg_image": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=1200&q=80" }
+  ],
+  "products": [
+    {
+      "id": 1, "category_id": 1, "name_zh": "高性能陶瓷刹车片", "name_en": "High Performance Ceramic Brake Pads",
+      "oe": "BP-CER-001", "model": "Toyota Camry / Honda Accord 2018+", "price": 280, "stock": 500,
+      "image": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&q=80",
+      "images": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&q=80",
+      "description_zh": "采用先进陶瓷配方，低噪音、低粉尘、超长寿命。适合日常通勤与激烈驾驶，安装简单，原厂尺寸精准匹配。",
+      "description_en": "Advanced ceramic formula, low noise, low dust, long lifespan. Suitable for daily commute and aggressive driving. Easy install, OEM fit.",
+      "seo_title": "高性能陶瓷刹车片 OEM BP-CER-001", "seo_keywords": "刹车片,陶瓷,OEM,汽配", "seo_desc": "高品质陶瓷刹车片，适配多款车型", "status": 1, "sort_order": 1
+    },
+    {
+      "id": 2, "category_id": 1, "name_zh": "前刹车盘套装", "name_en": "Front Brake Disc Kit",
+      "oe": "BD-FR-220", "model": "BMW 3 Series F30 / F31", "price": 650, "stock": 120,
+      "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+      "images": "", "description_zh": "通风刹车盘，优化散热设计，提高制动稳定性。表面经过特殊处理防锈。", "description_en": "Vented brake discs with optimized heat dissipation for stable braking performance.",
+      "seo_title": "前刹车盘套装 BD-FR-220", "seo_keywords": "刹车盘,BMW", "seo_desc": "高品质通风刹车盘", "status": 1, "sort_order": 2
+    },
+    {
+      "id": 3, "category_id": 2, "name_zh": "机油滤清器", "name_en": "Oil Filter",
+      "oe": "OF-MO-889", "model": "通用多数日系车型", "price": 35, "stock": 2000,
+      "image": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&q=80",
+      "images": "", "description_zh": "高效过滤杂质，保护发动机。原厂品质，安装便捷。", "description_en": "High efficiency filtration to protect engine. OEM quality, easy install.",
+      "seo_title": "机油滤清器 OF-MO-889", "seo_keywords": "机油滤,滤清器", "seo_desc": "高效机油滤清器", "status": 1, "sort_order": 1
+    },
+    {
+      "id": 4, "category_id": 2, "name_zh": "空气滤清器", "name_en": "Air Filter",
+      "oe": "AF-AR-112", "model": "Hyundai / Kia 主流车型", "price": 45, "stock": 1500,
+      "image": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=600&q=80",
+      "images": "", "description_zh": "多层过滤纸，提升进气效率与燃油经济性。", "description_en": "Multi-layer filter paper improves intake efficiency and fuel economy.",
+      "seo_title": "空气滤清器 AF-AR-112", "seo_keywords": "空气滤", "seo_desc": "高品质空气滤清器", "status": 1, "sort_order": 2
+    },
+    {
+      "id": 5, "category_id": 3, "name_zh": "铱金火花塞套装(4支)", "name_en": "Iridium Spark Plug Set (4pcs)",
+      "oe": "SP-IR-4", "model": "本田思域 / 丰田卡罗拉", "price": 180, "stock": 800,
+      "image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600&q=80",
+      "images": "", "description_zh": "铱金电极，点火更强，油耗更低，寿命可达10万公里。", "description_en": "Iridium electrode, stronger ignition, lower fuel consumption, up to 100,000 km lifespan.",
+      "seo_title": "铱金火花塞 SP-IR-4", "seo_keywords": "火花塞,铱金", "seo_desc": "高性能铱金火花塞", "status": 1, "sort_order": 1
+    },
+    {
+      "id": 6, "category_id": 4, "name_zh": "前减震器总成", "name_en": "Front Shock Absorber Assembly",
+      "oe": "SA-FR-550", "model": "大众帕萨特 / 迈腾", "price": 420, "stock": 200,
+      "image": "https://images.unsplash.com/photo-1553448560-12d8c2e8e0f0?w=600&q=80",
+      "images": "", "description_zh": "气体减震设计，舒适与操控平衡，安装即用。", "description_en": "Gas-charged design balancing comfort and handling. Ready to install.",
+      "seo_title": "前减震器 SA-FR-550", "seo_keywords": "减震器,悬挂", "seo_desc": "高品质减震器总成", "status": 1, "sort_order": 1
+    },
+    {
+      "id": 7, "category_id": 5, "name_zh": "交流发电机", "name_en": "Alternator",
+      "oe": "ALT-12V-120A", "model": "通用12V 120A", "price": 780, "stock": 80,
+      "image": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?w=600&q=80",
+      "images": "", "description_zh": "高效发电，低噪音，适配多数轿车与SUV。", "description_en": "High efficiency, low noise, fits most sedans and SUVs.",
+      "seo_title": "交流发电机 ALT-12V-120A", "seo_keywords": "发电机,电气", "seo_desc": "高品质交流发电机", "status": 1, "sort_order": 1
+    },
+    {
+      "id": 8, "category_id": 5, "name_zh": "启动马达", "name_en": "Starter Motor",
+      "oe": "STM-1.4KW", "model": "日产天籁 / 奇骏", "price": 520, "stock": 90,
+      "image": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&q=80",
+      "images": "", "description_zh": "大扭矩启动马达，寒冷天气依然可靠启动。", "description_en": "High torque starter motor, reliable even in cold weather.",
+      "seo_title": "启动马达 STM-1.4KW", "seo_keywords": "起动机,启动马达", "seo_desc": "可靠启动马达", "status": 1, "sort_order": 2
+    }
+  ],
+  "factory": {
+    "title_zh": "现代化生产基地 · 实力铸就品质",
+    "title_en": "Modern Manufacturing Base · Quality Built on Strength",
+    "intro_zh": "我们拥有超过15年的汽配制造经验，工厂面积达20000平方米，配备全自动生产线与严格的质量检测体系。产品远销全球50多个国家。",
+    "intro_en": "With over 15 years of auto parts manufacturing experience, our 20,000㎡ factory features fully automated production lines and strict quality control. Products exported to 50+ countries.",
+    "advantages_zh": "ISO9001认证|TS16949体系|全检出厂|快速交期|OEM/ODM支持|多币种结算",
+    "advantages_en": "ISO9001 Certified|TS16949 System|100% Inspection|Fast Delivery|OEM/ODM Support|Multi-currency",
+    "images": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80,https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?w=800&q=80,https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=800&q=80"
+  },
+  "config": {
+    "site_name": "AutoParts B2B Pro",
+    "company_name": "汽配通工业自动化设备",
+    "contact_email": "sales@autoparts-b2b.com",
+    "contact_whatsapp": "+85264960641",
+    "copyright_text": "© 2026 AutoParts B2B. All rights reserved.",
+    "address": "Hong Kong / Shenzhen",
+    "hero_bg": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1600&q=80",
+    "hero_bg_opacity": "0.4",
+    "products_bg": "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1600&q=80",
+    "products_bg_opacity": "0.2",
+    "page_bg": "",
+    "page_bg_opacity": "0.12",
+    "page_bg_full": "1",
+    "carousel_delay": "4500",
+    "carousel_effect": "fade",
+    "carousel_random": "0",
+    "rate_usd": "0.128",
+    "rate_cny": "0.93",
+    "rate_krw": "175",
+    "rate_jpy": "19.5",
+    "rate_auto": "1"
+  }
+}
