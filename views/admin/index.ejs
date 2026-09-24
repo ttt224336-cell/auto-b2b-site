@@ -3,351 +3,708 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= typeof config !== 'undefined' && config.site_name ? config.site_name : 'AUTO PARTS FACTORY' %></title>
+  <title><%= (typeof product !== 'undefined' && product) ? (product.name_zh || product.name_en || 'Product') : ((config && config.site_name) || 'AutoParts B2B') %> | Auto Parts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft YaHei",-apple-system,sans-serif;}
-    :root{
-      --main-dark:#0B2C58;
-      --blue:#22577A;
-      --light:#f5f7fa;
-      --gray:#e9ecef;
-      --text:#333;
-      --r:10px;
+    :root {
+      --main: #0A2F5F; --blue: #1E6BD9; --accent: #F59E0B; --light: #F3F4F6;
+      --text: #1F2937; --muted: #6B7280; --white: #fff; --r: 12px;
     }
-    body{background:var(--light);color:var(--text);min-height:100vh;display:flex;flex-direction:column;}
-    a{text-decoration:none;color:inherit;}
-    
-    /* ===== 顶部导航 ===== */
-    .header{
-      background:var(--main-dark);
-      color:#fff;
-      position:sticky;top:0;z-index:100;
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', system-ui, sans-serif; }
+    body { background: #F1F5F9; color: var(--text); line-height:1.6; min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+
+    /* 整页背景：柔和遮罩，避免刺眼 */
+    body.page-bg-full { background-size:cover; background-position:center; background-attachment:fixed; }
+    body.page-bg-full::before {
+      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background: linear-gradient(180deg, rgba(248,250,252,.92), rgba(241,245,249,.94));
+    }
+
+    /* Header */
+    .header {
+      position:sticky; top:0; z-index:100; background:var(--main); color:#fff;
       box-shadow:0 2px 12px rgba(0,0,0,.15);
     }
-    .header-inner{
-      max-width:1280px;margin:0 auto;
-      padding:14px 20px;
-      display:flex;align-items:center;justify-content:space-between;gap:20px;
+    .header-inner {
+      max-width:1200px; margin:0 auto; padding:14px 20px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
     }
-    .logo{font-size:22px;font-weight:700;letter-spacing:1px;}
-    .logo span{color:#7dd3fc;}
-    .search-box{
-      flex:1;max-width:480px;
-      display:flex;background:#fff;border-radius:8px;overflow:hidden;
+    .logo { font-size:18px; font-weight:700; letter-spacing:-.02em; }
+    .nav { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .nav a { color:rgba(255,255,255,.9); font-size:14px; font-weight:500; }
+    .nav a:hover { color:var(--accent); }
+    .lang-cur { display:flex; align-items:center; gap:8px; }
+    .lang-cur button {
+      background:transparent; border:1px solid rgba(255,255,255,.4); color:#fff;
+      padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; font-weight:500;
     }
-    .search-box input{
-      flex:1;border:none;padding:10px 16px;font-size:15px;outline:none;
+    .lang-cur button.active { background:var(--accent); border-color:var(--accent); color:#111; font-weight:700; }
+    /* 货币下拉：深色字 + 白底，展开可见 */
+    #currencySelect {
+      appearance:auto; -webkit-appearance:menulist;
+      background:#fff !important; color:#111 !important;
+      border:1px solid #D1D5DB; border-radius:6px;
+      padding:5px 8px; font-size:12px; font-weight:600; cursor:pointer; min-width:72px;
     }
-    .search-box button{
-      background:var(--blue);color:#fff;border:none;padding:0 20px;cursor:pointer;font-size:15px;
-    }
-    .header-right a{
-      color:#fff;margin-left:16px;font-size:14px;opacity:.9;
-    }
-    .header-right a:hover{opacity:1;}
+    #currencySelect option { background:#fff; color:#111; }
 
-    /* ===== 主体布局 ===== */
-    .container{
-      max-width:1280px;margin:0 auto;padding:24px 20px;
-      display:flex;gap:24px;flex:1;
+    /* Hero：更干净的遮罩，文字更清晰 */
+    .hero {
+      padding:64px 20px; text-align:center; position:relative; overflow:hidden;
+      background: linear-gradient(135deg, #0A2F5F 0%, #1E6BD9 55%, #3B82F6 100%);
+      color:#fff;
     }
-    
-    /* 左侧分类 */
-    .sidebar{
-      width:220px;flex-shrink:0;
+    .hero::before {
+      content:''; position:absolute; inset:0; z-index:0;
+      <% if (config && config.hero_bg) { %>
+      background-image: url('<%= config.hero_bg %>');
+      background-size:cover; background-position:center;
+      opacity: <%= Math.min(0.35, parseFloat(config.hero_bg_opacity||0.3) || 0.3) %>;
+      <% } else { %>
+      opacity:0;
+      <% } %>
     }
-    .side-card{
-      background:#fff;border-radius:var(--r);
-      box-shadow:0 2px 10px rgba(0,0,0,.05);
-      overflow:hidden;
+    .hero::after {
+      content:''; position:absolute; inset:0; z-index:0;
+      background: linear-gradient(135deg, rgba(10,47,95,.82), rgba(30,107,217,.75));
     }
-    .side-card h3{
-      background:var(--main-dark);color:#fff;
-      padding:14px 18px;font-size:15px;
+    .hero > * { position:relative; z-index:1; }
+    .hero h1 { font-size:clamp(1.55rem,4vw,2.35rem); margin-bottom:12px; font-weight:700; text-shadow:0 1px 2px rgba(0,0,0,.2); }
+    .hero p { color:rgba(255,255,255,.9); max-width:640px; margin:0 auto 24px; font-size:15px; }
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      padding:11px 22px; border-radius:8px; font-size:14px; font-weight:600; border:none; cursor:pointer;
+      transition: box-shadow .15s, background .15s; /* 无缩放抖动 */
     }
-    .cat-list a{
-      display:block;padding:12px 18px;
-      border-bottom:1px solid var(--gray);
-      font-size:14px;transition:.15s;
-    }
-    .cat-list a:hover,.cat-list a.active{
-      background:#e8f4fc;color:var(--blue);font-weight:600;
-    }
-    .cat-list a:last-child{border-bottom:none;}
+    .btn-main { background:#fff; color:var(--main); box-shadow:0 4px 14px rgba(0,0,0,.15); }
+    .btn-main:hover { box-shadow:0 6px 18px rgba(0,0,0,.2); }
+    .btn-accent { background:var(--accent); color:#111; }
+    .btn-outline { background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.6); }
 
-    /* 右侧内容 */
-    .main{flex:1;min-width:0;}
-    
-    /* 筛选栏 */
-    .filter-bar{
-      background:#fff;border-radius:var(--r);
-      padding:14px 18px;margin-bottom:20px;
-      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
-      box-shadow:0 2px 8px rgba(0,0,0,.04);
+    /* Factory */
+    .section { padding:48px 20px; }
+    .section-title { text-align:center; font-size:clamp(1.25rem,3vw,1.6rem); font-weight:700; color:var(--main); margin-bottom:6px; }
+    .section-sub { text-align:center; color:var(--muted); font-size:14px; margin-bottom:28px; }
+    .factory-grid {
+      max-width:1100px; margin:0 auto;
+      display:grid; grid-template-columns:1.1fr 1fr; gap:28px; align-items:center;
     }
-    .filter-bar .count{font-size:14px;color:#666;}
-    .sort-btns a{
-      display:inline-block;padding:6px 14px;margin-left:6px;
-      border-radius:6px;font-size:13px;background:#f1f3f5;color:#555;
+    .factory-slider {
+      position:relative; border-radius:14px; overflow:hidden; aspect-ratio:16/10;
+      background:#E2EBF5; box-shadow:0 8px 28px rgba(10,47,95,.08);
     }
-    .sort-btns a.active,.sort-btns a:hover{
-      background:var(--blue);color:#fff;
+    .factory-slider .slide {
+      position:absolute; inset:0; opacity:0; background-size:cover; background-position:center;
+      transition: opacity .7s ease;
     }
-
-    /* 产品网格 */
-    .product-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-      gap:20px;
+    .factory-slider .slide.active { opacity:1; }
+    .slider-dots {
+      position:absolute; bottom:12px; left:0; right:0; display:flex; justify-content:center; gap:6px; z-index:2;
     }
-    .product-card{
-      background:#fff;border-radius:var(--r);
-      overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.05);
-      transition:transform .2s,box-shadow .2s;
+    .slider-dots span {
+      width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.5); cursor:pointer;
     }
-    .product-card:hover{
-      transform:translateY(-4px);
-      box-shadow:0 8px 24px rgba(0,0,0,.1);
-    }
-    .product-img{
-      height:180px;background:#f8f9fa;
-      display:flex;align-items:center;justify-content:center;
-      overflow:hidden;
-    }
-    .product-img img{
-      max-width:100%;max-height:100%;object-fit:contain;
-    }
-    .no-img{
-      color:#bbb;font-size:14px;
-    }
-    .product-info{padding:16px;}
-    .product-info h3{
-      font-size:15px;margin-bottom:8px;
-      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-      height:42px;
-    }
-    .product-info .oe{font-size:12px;color:#888;margin-bottom:6px;}
-    .product-info .price{
-      font-size:18px;font-weight:700;color:var(--blue);
-    }
-    .product-info .price span{font-size:13px;font-weight:400;}
-
-    /* 详情页 */
-    .detail-wrap{
-      background:#fff;border-radius:var(--r);
-      padding:28px;box-shadow:0 2px 12px rgba(0,0,0,.05);
-    }
-    .detail-top{display:flex;gap:32px;flex-wrap:wrap;}
-    .detail-img{
-      width:380px;max-width:100%;
-      background:#f8f9fa;border-radius:8px;
-      display:flex;align-items:center;justify-content:center;
-      min-height:300px;
-    }
-    .detail-img img{max-width:100%;max-height:360px;object-fit:contain;}
-    .detail-info{flex:1;min-width:280px;}
-    .detail-info h1{font-size:24px;margin-bottom:16px;line-height:1.4;}
-    .detail-info .meta{margin-bottom:12px;font-size:14px;color:#555;}
-    .detail-info .meta b{color:#333;min-width:70px;display:inline-block;}
-    .detail-price{
-      font-size:28px;font-weight:700;color:var(--blue);
-      margin:20px 0;
-    }
-    .detail-desc{
-      margin-top:28px;padding-top:24px;border-top:1px solid var(--gray);
-      line-height:1.7;color:#555;font-size:15px;
-    }
-    .back-btn{
-      display:inline-block;margin-bottom:20px;
-      padding:8px 18px;background:#e9ecef;border-radius:6px;font-size:14px;
-    }
-    .back-btn:hover{background:#dee2e6;}
-
-    /* 空状态 */
-    .empty{
-      text-align:center;padding:60px 20px;color:#999;
-      background:#fff;border-radius:var(--r);
+    .slider-dots span.active { background:#fff; transform:scale(1.2); }
+    .factory-info h3 { font-size:1.2rem; color:var(--main); margin-bottom:10px; }
+    .factory-info p { color:var(--muted); font-size:14px; margin-bottom:14px; }
+    .adv-list { list-style:none; }
+    .adv-list li { display:flex; gap:10px; align-items:flex-start; margin-bottom:8px; font-size:14px; }
+    .adv-list .icon {
+      width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#1E6BD9,#0A2F5F);
+      color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
     }
 
-    /* 底部 */
-    .footer{
-      background:var(--main-dark);color:rgba(255,255,255,.7);
-      text-align:center;padding:20px;font-size:13px;margin-top:40px;
+    /* Products：底图用轻遮罩，内容可读 */
+    .products-section {
+      padding:48px 16px 64px; position:relative;
+      background: #EEF2F7;
+    }
+    .products-section.has-bg::before {
+      content:''; position:absolute; inset:0; z-index:0;
+      background-size:cover; background-position:center;
+      opacity: 0.18;
+      pointer-events:none;
+    }
+    .products-section > * { position:relative; z-index:1; }
+    .products-layout {
+      max-width:1180px; margin:0 auto;
+      display:grid; grid-template-columns:200px 1fr; gap:20px; align-items:start;
+    }
+    .sidebar-cat {
+      position:sticky; top:74px; background:#fff; border-radius:var(--r); padding:16px;
+      box-shadow:0 2px 10px rgba(0,0,0,.05); border:1px solid #E5E7EB;
+    }
+    .sidebar-cat h4 { font-size:12px; color:var(--muted); margin-bottom:10px; letter-spacing:.04em; }
+    .cat-list a {
+      display:block; padding:9px 12px; border-radius:8px; font-size:13px; color:var(--text);
+      margin-bottom:4px; transition: background .15s, color .15s;
+    }
+    .cat-list a:hover { background:#EBF2FB; color:var(--blue); }
+    .cat-list a.active { background:var(--blue); color:#fff; font-weight:600; }
+
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+    .toolbar input, .toolbar select {
+      padding:9px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; outline:none; background:#fff; color:#111;
+    }
+    .toolbar input:focus { border-color:var(--blue); }
+    .product-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px;
+    }
+    /* 卡片：取消上移抖动，仅轻微阴影 */
+    .card {
+      background:#fff; border-radius:var(--r); overflow:hidden;
+      box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid #E5E7EB;
+      transition: box-shadow .2s, border-color .2s;
+    }
+    .card:hover {
+      box-shadow:0 6px 20px rgba(10,47,95,.1);
+      border-color:#C7D2FE;
+    }
+    .card:active { box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .card-img { aspect-ratio:1; background:#F1F5F9; overflow:hidden; }
+    .card-img img { width:100%; height:100%; object-fit:cover; transition:none; }
+    .card-body { padding:14px; }
+    .card-body h3 { font-size:14px; font-weight:600; color:var(--main); margin-bottom:6px; line-height:1.35; }
+    .card-meta { font-size:12px; color:var(--muted); margin-bottom:8px; }
+    .price { font-size:16px; font-weight:700; color:var(--blue); }
+    .price .cur-sym { font-size:12px; margin-right:2px; }
+
+    /* Detail */
+    .detail-wrap { max-width:1000px; margin:0 auto; padding:32px 20px 60px; }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
+    .detail-img { border-radius:var(--r); overflow:hidden; background:#F1F5F9; aspect-ratio:1; border:1px solid #E5E7EB; }
+    .detail-img img { width:100%; height:100%; object-fit:cover; }
+    .detail-info h1 { font-size:1.5rem; color:var(--main); margin-bottom:12px; }
+    .detail-info .meta { background:#F8FAFC; padding:12px 14px; border-radius:8px; margin:14px 0; font-size:14px; border:1px solid #E5E7EB; }
+    .detail-info .meta p { margin-bottom:4px; }
+    .spec-list { list-style:none; margin:16px 0; }
+    .spec-list li { padding:8px 0; border-bottom:1px solid #E5E7EB; font-size:14px; }
+
+    footer { background:var(--main); color:#CBD5E1; padding:40px 20px 24px; margin-top:40px; }
+    .foot-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:28px; }
+    .foot-col h4 { color:var(--accent); margin-bottom:12px; font-size:15px; }
+    .foot-col p, .foot-col a { font-size:13px; line-height:1.8; color:#94A3B8; }
+    .copyright { text-align:center; margin-top:28px; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); font-size:12px; color:#64748B; }
+
+    .wa-float {
+      position:fixed; bottom:24px; right:24px; z-index:90;
+      background:#25D366; color:#fff; padding:12px 18px; border-radius:50px;
+      box-shadow:0 4px 16px rgba(37,211,102,.4); font-weight:600; font-size:14px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .empty { text-align:center; padding:48px 20px; color:var(--muted); }
+
+    /* 语言：用 class 切换显隐 */
+    .i18n-en { display:none !important; }
+    html[lang="en"] .i18n-zh { display:none !important; }
+    html[lang="en"] .i18n-en { display:inline !important; }
+    html[lang="en"] .i18n-en-block { display:block !important; }
+    .i18n-en-block { display:none !important; }
+    html[lang="zh-CN"] .i18n-en-block, html[lang="zh"] .i18n-en-block { display:none !important; }
+
+    @media (max-width:900px) {
+      .factory-grid, .detail-grid, .products-layout { grid-template-columns:1fr !important; }
+      .sidebar-cat { position:static; }
+      .cat-list { display:flex; flex-wrap:wrap; gap:6px; }
+      .cat-list a { margin:0; }
+      .product-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
     }
 
-    /* WhatsApp 悬浮 */
-    .wa-float{
-      position:fixed;right:24px;bottom:24px;z-index:99;
-      width:56px;height:56px;border-radius:50%;
-      background:#25D366;color:#fff;
-      display:flex;align-items:center;justify-content:center;
-      font-size:28px;box-shadow:0 4px 16px rgba(37,211,102,.4);
-      transition:transform .2s;
+    /* 回顶按钮 */
+    .scroll-top {
+      position:fixed; bottom:90px; right:24px; z-index:89;
+      width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+      background:var(--main); color:#fff; font-size:20px; box-shadow:0 4px 14px rgba(0,0,0,.2);
+      display:none; align-items:center; justify-content:center;
+      transition: opacity .2s, background .2s;
     }
-    .wa-float:hover{transform:scale(1.08);}
+    .scroll-top.show { display:flex; }
+    .scroll-top:hover { background:var(--blue); }
+    /* 手机返回 */
+    .mobile-back {
+      display:none; position:fixed; top:12px; left:12px; z-index:110;
+      width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
+      background:rgba(10,47,95,.9); color:#fff; font-size:18px;
+      align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.25);
+    }
+    @media (max-width:768px) {
+      .mobile-back { display:flex; }
+      .header-inner { padding-left:56px; }
+    }
+    /* 社交图标 */
+    .social-bar {
+      display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:16px;
+    }
+    .social-item {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      text-decoration:none; color:#94A3B8; font-size:12px; min-width:64px;
+    }
+    .social-item img {
+      width:40px; height:40px; border-radius:50%; object-fit:cover;
+      border:2px solid rgba(255,255,255,.2); background:#fff;
+    }
+    .social-item:hover { color:var(--accent); }
+    .social-item:hover img { border-color:var(--accent); }
 
-    /* 响应式 */
-    @media(max-width:900px){
-      .container{flex-direction:column;}
-      .sidebar{width:100%;}
-      .cat-list{display:flex;flex-wrap:wrap;gap:8px;padding:12px;}
-      .cat-list a{border:1px solid var(--gray);border-radius:6px;padding:8px 14px;}
-      .detail-top{flex-direction:column;}
-      .detail-img{width:100%;}
-    }
-    @media(max-width:600px){
-      .header-inner{flex-wrap:wrap;}
-      .search-box{order:3;max-width:100%;width:100%;}
-      .product-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-      .product-img{height:140px;}
-    }
   </style>
 </head>
-<body>
+<body class="<%= (config && config.page_bg_full==='1' && config.page_bg) ? 'page-bg-full' : '' %>"
+  <% if (config && config.page_bg_full==='1' && config.page_bg) { %>style="background-image:url('<%= config.page_bg %>')"<% } %>>
 
-  <!-- 顶部 -->
+  <button type="button" class="mobile-back" id="mobileBack" aria-label="Back">←</button>
   <header class="header">
     <div class="header-inner">
-      <a href="/" class="logo">AUTO <span>PARTS</span></a>
-      
-      <form class="search-box" action="/" method="get">
-        <% if(typeof catId !== 'undefined' && catId){ %>
-          <input type="hidden" name="cat" value="<%= catId %>">
-        <% } %>
-        <input type="text" name="q" placeholder="搜索产品名称 / OE号 / 车型..." value="<%= typeof keyword !== 'undefined' ? keyword : '' %>">
-        <button type="submit">搜索</button>
-      </form>
-
-      <div class="header-right">
-        <a href="/admin" target="_blank">管理后台</a>
-      </div>
+      <a href="/" class="logo"><%= (config && config.site_name) || 'AutoParts B2B' %></a>
+      <nav class="nav">
+        <a href="/"><span class="i18n-zh">首页</span><span class="i18n-en">Home</span></a>
+        <a href="/#products"><span class="i18n-zh">产品</span><span class="i18n-en">Products</span></a>
+        <a href="/#factory"><span class="i18n-zh">工厂</span><span class="i18n-en">Factory</span></a>
+        <a href="/#inquiry"><span class="i18n-zh">询盘</span><span class="i18n-en">Inquiry</span></a>
+        <div class="lang-cur">
+          <button type="button" data-lang="zh" class="lang-btn active">中文</button>
+          <button type="button" data-lang="en" class="lang-btn">EN</button>
+          <select id="currencySelect" aria-label="Currency">
+            <option value="HKD">HKD</option>
+            <option value="USD">USD</option>
+            <option value="CNY">CNY</option>
+            <option value="KRW">KRW</option>
+            <option value="JPY">JPY</option>
+          </select>
+        </div>
+      </nav>
     </div>
   </header>
 
-  <div class="container">
-    <!-- 左侧分类 -->
-    <aside class="sidebar">
-      <div class="side-card">
-        <h3>全部分类</h3>
+  <% if (typeof page === 'undefined' || page === 'list') { %>
+  <section class="hero">
+    <h1>
+      <span class="i18n-zh"><%= (config && config.company_name) || '汽配通 · 工业自动化配件' %></span>
+      <span class="i18n-en"><%= (config && config.company_name) || 'Auto Parts B2B' %></span>
+    </h1>
+    <p>
+      <span class="i18n-zh">一站式汽车零部件 B2B 采购平台 · OEM / ODM · 全球发货</span>
+      <span class="i18n-en">One-stop auto parts B2B platform · OEM / ODM · Global shipping</span>
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="#products" class="btn btn-main"><span class="i18n-zh">浏览产品</span><span class="i18n-en">Browse Products</span></a>
+      <a href="#inquiry" class="btn btn-accent"><span class="i18n-zh">立即询盘</span><span class="i18n-en">Inquiry Now</span></a>
+    </div>
+  </section>
+
+  <section class="section" id="factory" style="background:#fff;">
+    <h2 class="section-title">
+      <span class="i18n-zh"><%= (factory && factory.title_zh) || '现代化生产基地' %></span>
+      <span class="i18n-en"><%= (factory && factory.title_en) || 'Modern Manufacturing Base' %></span>
+    </h2>
+    <p class="section-sub">
+      <span class="i18n-zh"><%= (factory && factory.title_en) || '' %></span>
+      <span class="i18n-en"><%= (factory && factory.title_zh) || '' %></span>
+    </p>
+    <div class="factory-grid">
+      <div class="factory-slider" id="factorySlider">
+        <% 
+          var fImgs = [];
+          if (factory && factory.images) {
+            fImgs = String(factory.images).split(',').map(function(s){return s.trim();}).filter(Boolean);
+          }
+          if (!fImgs.length) fImgs = ['https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80'];
+          fImgs.forEach(function(src, i){ 
+        %>
+          <div class="slide <%= i===0?'active':'' %>" style="background-image:url('<%= src %>')"></div>
+        <% }); %>
+        <div class="slider-dots">
+          <% fImgs.forEach(function(_, i){ %><span data-index="<%= i %>" class="<%= i===0?'active':'' %>"></span><% }); %>
+        </div>
+      </div>
+      <div class="factory-info">
+        <h3>
+          <span class="i18n-zh"><%= (factory && factory.title_zh) || '实力铸就品质' %></span>
+          <span class="i18n-en"><%= (factory && factory.title_en) || 'Quality Built on Strength' %></span>
+        </h3>
+        <p>
+          <span class="i18n-zh"><%= (factory && factory.intro_zh) || '专业汽配制造，严格品控，服务全球客户。' %></span>
+          <span class="i18n-en"><%= (factory && factory.intro_en) || 'Professional auto parts manufacturing with strict QC for global customers.' %></span>
+        </p>
+        <ul class="adv-list">
+          <% 
+            var advZh = (factory && factory.advantages_zh) ? String(factory.advantages_zh).split('|') : ['ISO认证','快速交期','OEM/ODM'];
+            var advEn = (factory && factory.advantages_en) ? String(factory.advantages_en).split('|') : advZh;
+            for (var ai=0; ai<advZh.length; ai++) {
+              if (!String(advZh[ai]).trim()) continue;
+          %>
+            <li>
+              <span class="icon">✓</span>
+              <span>
+                <span class="i18n-zh"><%= String(advZh[ai]).trim() %></span>
+                <span class="i18n-en"><%= String(advEn[ai] || advZh[ai]).trim() %></span>
+              </span>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="products-section <%= (config && config.products_bg) ? 'has-bg' : '' %>" id="products"
+    <% if (config && config.products_bg) { %>style="--pbg:url('<%= config.products_bg %>')"<% } %>>
+    <style>
+      .products-section.has-bg::before { background-image: var(--pbg, none); }
+      .products-section.has-cat-bg::before { background-image: var(--cat-bg) !important; opacity: 0.22; }
+  
+    /* 回顶按钮 */
+    .scroll-top {
+      position:fixed; bottom:90px; right:24px; z-index:89;
+      width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+      background:var(--main); color:#fff; font-size:20px; box-shadow:0 4px 14px rgba(0,0,0,.2);
+      display:none; align-items:center; justify-content:center;
+      transition: opacity .2s, background .2s;
+    }
+    .scroll-top.show { display:flex; }
+    .scroll-top:hover { background:var(--blue); }
+    /* 手机返回 */
+    .mobile-back {
+      display:none; position:fixed; top:12px; left:12px; z-index:110;
+      width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
+      background:rgba(10,47,95,.9); color:#fff; font-size:18px;
+      align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.25);
+    }
+    @media (max-width:768px) {
+      .mobile-back { display:flex; }
+      .header-inner { padding-left:56px; }
+    }
+    /* 社交图标 */
+    .social-bar {
+      display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:16px;
+    }
+    .social-item {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      text-decoration:none; color:#94A3B8; font-size:12px; min-width:64px;
+    }
+    .social-item img {
+      width:40px; height:40px; border-radius:50%; object-fit:cover;
+      border:2px solid rgba(255,255,255,.2); background:#fff;
+    }
+    .social-item:hover { color:var(--accent); }
+    .social-item:hover img { border-color:var(--accent); }
+
+  </style>
+    <h2 class="section-title"><span class="i18n-zh">热门产品</span><span class="i18n-en">Hot Products</span></h2>
+    <p class="section-sub"><span class="i18n-zh">按分类筛选 · 支持多币种显示</span><span class="i18n-en">Filter by category · Multi-currency</span></p>
+    <div class="products-layout">
+      <aside class="sidebar-cat">
+        <h4><span class="i18n-zh">分类</span><span class="i18n-en">Categories</span></h4>
         <div class="cat-list">
-          <a href="/" class="<%= (!catId || catId==='') ? 'active' : '' %>">全部产品</a>
-          <% if(typeof categories !== 'undefined' && categories && categories.length){ %>
-            <% categories.forEach(c => { %>
-              <a href="/?cat=<%= c.id %><%= keyword ? '&q='+encodeURIComponent(keyword) : '' %>"
-                 class="<%= String(catId) === String(c.id) ? 'active' : '' %>">
-                <%= c.name %>
+          <a href="/#products" class="cat-filter <%= (!catId || catId==='') ? 'active' : '' %>" data-cat=""><span class="i18n-zh">全部</span><span class="i18n-en">All</span></a>
+          <% if (typeof categories !== 'undefined' && categories && categories.length) { %>
+            <% categories.forEach(function(c){ %>
+              <a href="/?cat=<%= c.id %><%= keyword ? '&q='+encodeURIComponent(keyword) : '' %>#products"
+                 class="cat-filter <%= String(catId) === String(c.id) ? 'active' : '' %>"
+                 data-cat="<%= c.id %>"
+                 data-bg="<%= c.bg_image || '' %>">
+                <span class="i18n-zh"><%= c.name_zh || c.name_en || ('分类'+c.id) %></span>
+                <span class="i18n-en"><%= c.name_en || c.name_zh || ('Cat '+c.id) %></span>
               </a>
-            <% }) %>
+            <% }); %>
+          <% } %>
+        </div>
+      </aside>
+      <div>
+        <form class="toolbar" method="get" action="/">
+          <% if (catId) { %><input type="hidden" name="cat" value="<%= catId %>"><% } %>
+          <input type="text" name="q" value="<%= keyword || '' %>" placeholder="OE / Name / Model" style="flex:1;min-width:160px;">
+          <select name="sort">
+            <option value="date" <%= sort==='date'?'selected':'' %>>Latest</option>
+            <option value="priceAsc" <%= sort==='priceAsc'?'selected':'' %>>Price ↑</option>
+            <option value="priceDesc" <%= sort==='priceDesc'?'selected':'' %>>Price ↓</option>
+          </select>
+          <button type="submit" class="btn btn-main" style="background:var(--blue);color:#fff;"><span class="i18n-zh">搜索</span><span class="i18n-en">Search</span></button>
+        </form>
+        <div class="product-grid">
+          <% if (typeof products !== 'undefined' && products && products.length) { %>
+            <% products.forEach(function(p){ 
+              var img = p.image || (p.images ? String(p.images).split(',')[0] : '') || 'https://via.placeholder.com/400x400?text=No+Image';
+            %>
+              <a href="/product/<%= p.id %>" class="card">
+                <div class="card-img"><img src="<%= img %>" alt="" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"></div>
+                <div class="card-body">
+                  <h3>
+                    <span class="i18n-zh"><%= p.name_zh || p.name_en || '未命名' %></span>
+                    <span class="i18n-en"><%= p.name_en || p.name_zh || 'Unnamed' %></span>
+                  </h3>
+                  <div class="card-meta">OE: <%= p.oe || '-' %> · <%= p.model || '' %></div>
+                  <div class="price" data-hkd="<%= p.price || 0 %>">
+                    <span class="cur-sym">HK$</span><span class="cur-val"><%= Number(p.price||0).toFixed(2) %></span>
+                  </div>
+                </div>
+              </a>
+            <% }); %>
+          <% } else { %>
+            <div class="empty" style="grid-column:1/-1;">
+              <span class="i18n-zh">暂无产品，请先在后台导入数据包或添加产品。</span>
+              <span class="i18n-en">No products yet. Import a datapack or add products in admin.</span>
+            </div>
           <% } %>
         </div>
       </div>
-    </aside>
+    </div>
+  </section>
 
-    <!-- 右侧主内容 -->
-    <main class="main">
+  <section class="section" id="inquiry" style="background:#fff;">
+    <h2 class="section-title"><span class="i18n-zh">联系我们 / 询盘</span><span class="i18n-en">Contact / Inquiry</span></h2>
+    <p class="section-sub">WhatsApp: <%= (config && config.wa) || '+85264960641' %> · Email: <%= (config && config.email) || '' %></p>
+    <div style="max-width:480px;margin:0 auto;text-align:center;">
+      <a href="https://wa.me/<%= ((config && config.wa) || '85264960641').replace(/[^0-9]/g,'') %>" class="btn btn-main" style="background:var(--blue);color:#fff;" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </section>
 
-      <% if(page === 'list'){ %>
-        <!-- ===== 列表页 ===== -->
-        <div class="filter-bar">
-          <div class="count">
-            共找到 <b><%= typeof products !== 'undefined' && products ? products.length : 0 %></b> 个产品
-            <% if(keyword){ %> · 关键词「<%= keyword %>」<% } %>
-          </div>
-          <div class="sort-btns">
-            <a href="/?<%= catId ? 'cat='+catId+'&' : '' %><%= keyword ? 'q='+encodeURIComponent(keyword)+'&' : '' %>sort=date"
-               class="<%= (!sort || sort==='date') ? 'active' : '' %>">最新</a>
-            <a href="/?<%= catId ? 'cat='+catId+'&' : '' %><%= keyword ? 'q='+encodeURIComponent(keyword)+'&' : '' %>sort=priceAsc"
-               class="<%= sort==='priceAsc' ? 'active' : '' %>">价格↑</a>
-            <a href="/?<%= catId ? 'cat='+catId+'&' : '' %><%= keyword ? 'q='+encodeURIComponent(keyword)+'&' : '' %>sort=priceDesc"
-               class="<%= sort==='priceDesc' ? 'active' : '' %>">价格↓</a>
-          </div>
+  <% } else if (page === 'detail' && product) { %>
+  <div class="detail-wrap">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+      <a href="/"><span class="i18n-zh">首页</span><span class="i18n-en">Home</span></a> /
+      <a href="/#products"><span class="i18n-zh">产品</span><span class="i18n-en">Products</span></a> /
+      <span class="i18n-zh"><%= product.name_zh || product.name_en || '' %></span>
+      <span class="i18n-en"><%= product.name_en || product.name_zh || '' %></span>
+    </p>
+    <div class="detail-grid">
+      <div class="detail-img">
+        <% var dimg = product.image || (product.images ? String(product.images).split(',')[0] : '') || 'https://via.placeholder.com/600x600?text=No+Image'; %>
+        <img src="<%= dimg %>" alt="" onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'">
+      </div>
+      <div class="detail-info">
+        <h1>
+          <span class="i18n-zh"><%= product.name_zh || product.name_en || '产品详情' %></span>
+          <span class="i18n-en"><%= product.name_en || product.name_zh || 'Product Detail' %></span>
+        </h1>
+        <div class="meta">
+          <p><strong>OE：</strong><%= product.oe || '-' %></p>
+          <p><strong><span class="i18n-zh">适用型号</span><span class="i18n-en">Model</span>：</strong><%= product.model || '-' %></p>
+          <p><strong><span class="i18n-zh">库存</span><span class="i18n-en">Stock</span>：</strong><%= product.stock != null ? product.stock : '-' %></p>
         </div>
-
-        <% if(typeof products !== 'undefined' && products && products.length){ %>
-          <div class="product-grid">
-            <% products.forEach(p => { %>
-              <a href="/product/<%= p.id %>" class="product-card">
-                <div class="product-img">
-                  <% if(p.image){ %>
-                    <img src="<%= p.image %>" alt="<%= p.name %>" loading="lazy"
-                         onerror="this.parentElement.innerHTML='<div class=no-img>暂无图片</div>'">
-                  <% } else { %>
-                    <div class="no-img">暂无图片</div>
-                  <% } %>
-                </div>
-                <div class="product-info">
-                  <h3><%= p.name %></h3>
-                  <% if(p.oe){ %><div class="oe">OE: <%= p.oe %></div><% } %>
-                  <div class="price"><span>HK$</span><%= Number(p.price||0).toFixed(2) %></div>
-                </div>
-              </a>
-            <% }) %>
-          </div>
-        <% } else { %>
-          <div class="empty">暂无符合条件的产品</div>
-        <% } %>
-
-      <% } else if(page === 'detail'){ %>
-        <!-- ===== 详情页 ===== -->
-        <a href="javascript:history.back()" class="back-btn">← 返回列表</a>
-
-        <% if(product){ %>
-          <div class="detail-wrap">
-            <div class="detail-top">
-              <div class="detail-img">
-                <% if(product.image){ %>
-                  <img src="<%= product.image %>" alt="<%= product.name %>"
-                       onerror="this.parentElement.innerHTML='<div class=no-img>暂无图片</div>'">
-                <% } else { %>
-                  <div class="no-img">暂无图片</div>
-                <% } %>
-              </div>
-              <div class="detail-info">
-                <h1><%= product.name %></h1>
-                <div class="meta"><b>OE编号：</b><%= product.oe || '-' %></div>
-                <div class="meta"><b>适用车型：</b><%= product.model || '-' %></div>
-                <div class="meta"><b>库存：</b><%= product.stock != null ? product.stock : '-' %></div>
-                <div class="detail-price">HK$ <%= Number(product.price||0).toFixed(2) %></div>
-                
-                <% if(config && config.wa){ %>
-                  <a href="https://wa.me/<%= config.wa.replace(/[^0-9]/g,'') %>?text=您好，我想咨询产品：<%= encodeURIComponent(product.name) %>"
-                     target="_blank"
-                     style="display:inline-block;background:#25D366;color:#fff;padding:12px 28px;border-radius:8px;font-size:15px;">
-                    💬 WhatsApp 询价
-                  </a>
-                <% } %>
-              </div>
-            </div>
-
-            <% if(product.description){ %>
-              <div class="detail-desc">
-                <h3 style="margin-bottom:12px;color:#333;">产品说明</h3>
-                <%= product.description %>
-              </div>
-            <% } %>
-          </div>
-        <% } else { %>
-          <div class="empty">产品不存在或已下架</div>
-        <% } %>
-      <% } %>
-
-    </main>
+        <div class="price" data-hkd="<%= product.price || 0 %>" style="font-size:22px;margin:12px 0;">
+          <span class="cur-sym">HK$</span><span class="cur-val"><%= Number(product.price||0).toFixed(2) %></span>
+        </div>
+        <ul class="spec-list">
+          <li>
+            <strong><span class="i18n-zh">描述</span><span class="i18n-en">Description</span>：</strong>
+            <span class="i18n-zh"><%= product.description_zh || product.description_en || '' %></span>
+            <span class="i18n-en"><%= product.description_en || product.description_zh || '' %></span>
+          </li>
+        </ul>
+        <a href="https://wa.me/<%= ((config && config.wa) || '85264960641').replace(/[^0-9]/g,'') %>?text=<%= encodeURIComponent('Inquiry: '+(product.name_zh||product.name_en||'')+' OE:'+(product.oe||'')) %>" class="btn btn-main" style="background:var(--blue);color:#fff;" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="/" class="btn" style="margin-left:8px;background:#fff;border:1px solid #D1D5DB;color:var(--main);"><span class="i18n-zh">返回列表</span><span class="i18n-en">Back</span></a>
+      </div>
+    </div>
   </div>
-
-  <footer class="footer">
-    <%= typeof config !== 'undefined' && config.copyright_text ? config.copyright_text : '© AUTO PARTS FACTORY' %>
-    <% if(typeof config !== 'undefined' && config.email){ %> · <%= config.email %><% } %>
-  </footer>
-
-  <!-- WhatsApp 悬浮按钮 -->
-  <% if(typeof config !== 'undefined' && config.wa){ %>
-    <a href="https://wa.me/<%= config.wa.replace(/[^0-9]/g,'') %>" 
-       class="wa-float" target="_blank" title="WhatsApp 联系我们">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-      </svg>
-    </a>
+  <% } else { %>
+  <div class="empty" style="padding:80px 20px;">
+    <p><span class="i18n-zh">页面不存在或产品已下架</span><span class="i18n-en">Page not found or product offline</span></p>
+    <a href="/" class="btn btn-main" style="margin-top:16px;background:var(--blue);color:#fff;"><span class="i18n-zh">返回首页</span><span class="i18n-en">Home</span></a>
+  </div>
   <% } %>
 
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-col">
+        <h4><%= (config && config.company_name) || 'Company' %></h4>
+        <p><%= (config && config.address) || 'Hong Kong / Shenzhen' %></p>
+      </div>
+      <div class="foot-col">
+        <h4><span class="i18n-zh">联系方式</span><span class="i18n-en">Contact</span></h4>
+        <p>Email: <%= (config && config.email) || '' %><br>WhatsApp: <%= (config && config.wa) || '' %></p>
+      </div>
+    </div>
+    
+      <div class="social-bar" id="socialBar">
+        <% if (config && config.social1_img) { %>
+        <a class="social-item" href="<%= config.social1_url || '#' %>" target="_blank" rel="noopener">
+          <img src="<%= config.social1_img %>" alt="">
+          <% if (config.social1_text) { %><span><%= config.social1_text %></span><% } %>
+        </a>
+        <% } %>
+        <% if (config && config.social2_img) { %>
+        <a class="social-item" href="<%= config.social2_url || '#' %>" target="_blank" rel="noopener">
+          <img src="<%= config.social2_img %>" alt="">
+          <% if (config.social2_text) { %><span><%= config.social2_text %></span><% } %>
+        </a>
+        <% } %>
+        <% if (config && config.social3_img) { %>
+        <a class="social-item" href="<%= config.social3_url || '#' %>" target="_blank" rel="noopener">
+          <img src="<%= config.social3_img %>" alt="">
+          <% if (config.social3_text) { %><span><%= config.social3_text %></span><% } %>
+        </a>
+        <% } %>
+      </div>
+
+    <div class="copyright"><%= (config && config.copyright_text) || '© 2026 AutoParts B2B. All rights reserved.' %></div>
+  </footer>
+
+  
+  <button type="button" class="scroll-top" id="scrollTopBtn" title="回顶部">↑</button>
+  <% if (config && config.wa) { %>
+  <a href="https://wa.me/<%= String(config.wa).replace(/[^0-9]/g,'') %>" class="wa-float" target="_blank" rel="noopener">💬 WhatsApp</a>
+  <% } %>
+
+  <script>
+    window.__RATES = {
+      HKD: 1,
+      USD: parseFloat('<%= (config && config.rate_usd) || "0.128" %>') || 0.128,
+      CNY: parseFloat('<%= (config && config.rate_cny) || "0.93" %>') || 0.93,
+      KRW: parseFloat('<%= (config && config.rate_krw) || "175" %>') || 175,
+      JPY: parseFloat('<%= (config && config.rate_jpy) || "19.5" %>') || 19.5
+    };
+    window.__SYMBOLS = { HKD:'HK$', USD:'US$', CNY:'¥', KRW:'₩', JPY:'¥' };
+
+    // 中英文切换（真正切换页面文案）
+    (function(){
+      var btns = document.querySelectorAll('.lang-btn');
+      var saved = localStorage.getItem('lang') || 'zh';
+      function setLang(lang) {
+        document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
+        btns.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang') === lang); });
+        localStorage.setItem('lang', lang);
+      }
+      setLang(saved);
+      btns.forEach(function(btn){
+        btn.addEventListener('click', function(){ setLang(btn.getAttribute('data-lang')); });
+      });
+    })();
+
+    // 货币切换
+    (function(){
+      var sel = document.getElementById('currencySelect');
+      if (!sel) return;
+      var rates = window.__RATES, symbols = window.__SYMBOLS;
+      var saved = localStorage.getItem('currency') || 'HKD';
+      if (rates[saved]) sel.value = saved;
+      function format(n, cur) {
+        if (cur === 'KRW' || cur === 'JPY') return Math.round(n).toLocaleString();
+        return Number(n).toFixed(2);
+      }
+      function apply(cur) {
+        var rate = rates[cur] || 1, sym = symbols[cur] || cur;
+        document.querySelectorAll('.price[data-hkd]').forEach(function(el){
+          var hkd = parseFloat(el.getAttribute('data-hkd')) || 0;
+          var converted = hkd * rate;
+          var symEl = el.querySelector('.cur-sym'), valEl = el.querySelector('.cur-val');
+          if (symEl) symEl.textContent = sym;
+          if (valEl) valEl.textContent = format(converted, cur);
+        });
+        localStorage.setItem('currency', cur);
+      }
+      apply(sel.value);
+      sel.addEventListener('change', function(){ apply(sel.value); });
+    })();
+
+    // 工厂轮播
+    (function(){
+      var slides = document.querySelectorAll('#factorySlider .slide');
+      var dots = document.querySelectorAll('.slider-dots span');
+      if (!slides.length) return;
+      var idx = 0;
+      var delay = <%= (config && config.carousel_delay) ? (parseInt(config.carousel_delay,10)||4500) : 4500 %>;
+      if (delay < 1500) delay = 4500;
+      function show(i) {
+        slides.forEach(function(s,j){ s.classList.toggle('active', j===i); });
+        dots.forEach(function(d,j){ d.classList.toggle('active', j===i); });
+        idx = i;
+      }
+      dots.forEach(function(d){ d.addEventListener('click', function(){ show(+d.getAttribute('data-index')); }); });
+      if (slides.length > 1) setInterval(function(){ show((idx+1)%slides.length); }, delay);
+    })();
+
+    // 分类切换：AJAX 不整页刷新、不跳顶
+    (function(){
+      var sec = document.getElementById('products');
+      var grid = document.querySelector('.product-grid');
+      if (!sec || !grid) return;
+
+      function applyBg(url) {
+        if (!url) {
+          sec.classList.remove('has-cat-bg');
+          return;
+        }
+        sec.style.setProperty('--cat-bg', 'url('+url+')');
+        sec.classList.add('has-bg', 'has-cat-bg');
+      }
+
+      function renderProducts(list) {
+        if (!list || !list.length) {
+          grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">暂无产品</div>';
+          return;
+        }
+        var lang = document.documentElement.getAttribute('lang') || 'zh-CN';
+        var isEn = lang === 'en';
+        grid.innerHTML = list.map(function(p){
+          var img = p.image || (p.images ? String(p.images).split(',')[0] : '') || 'https://via.placeholder.com/400x400?text=No+Image';
+          var name = isEn ? (p.name_en || p.name_zh || '') : (p.name_zh || p.name_en || '');
+          var price = Number(p.price || 0).toFixed(2);
+          return '<a href="/product/'+p.id+'" class="card">' +
+            '<div class="card-img"><img src="'+img+'" alt="" loading="lazy" onerror="this.src=\'https://via.placeholder.com/400x400?text=No+Image\'"></div>' +
+            '<div class="card-body"><h3>'+name+'</h3>' +
+            '<div class="card-meta">OE: '+(p.oe||'-')+' · '+(p.model||'')+'</div>' +
+            '<div class="price" data-hkd="'+(p.price||0)+'"><span class="cur-sym">HK$</span><span class="cur-val">'+price+'</span></div>' +
+            '</div></a>';
+        }).join('');
+        // 重新应用货币
+        var sel = document.getElementById('currencySelect');
+        if (sel) sel.dispatchEvent(new Event('change'));
+      }
+
+      document.querySelectorAll('.cat-filter').forEach(function(a){
+        a.addEventListener('click', function(e){
+          e.preventDefault();
+          var cat = this.getAttribute('data-cat') || '';
+          var bg = this.getAttribute('data-bg') || '';
+          document.querySelectorAll('.cat-filter').forEach(function(x){ x.classList.remove('active'); });
+          this.classList.add('active');
+          applyBg(bg);
+          // 保持当前滚动，不跳顶
+          var keepY = window.scrollY;
+          var q = new URLSearchParams(window.location.search);
+          var keyword = q.get('q') || '';
+          var sort = q.get('sort') || 'date';
+          var url = '/api/products?cat=' + encodeURIComponent(cat) + '&q=' + encodeURIComponent(keyword) + '&sort=' + encodeURIComponent(sort);
+          fetch(url).then(function(r){ return r.json(); }).then(function(j){
+            if (j.success) renderProducts(j.products);
+            // 更新地址栏但不跳转
+            var newUrl = cat ? ('/?cat=' + cat + (keyword ? '&q='+encodeURIComponent(keyword) : '') + '#products') : ('/' + (keyword ? '?q='+encodeURIComponent(keyword) : '') + '#products');
+            history.pushState(null, '', newUrl);
+            window.scrollTo(0, keepY);
+          }).catch(function(){
+            // 失败则正常跳转
+            window.location.href = this.href;
+          }.bind(this));
+        });
+      });
+
+      var active = document.querySelector('.cat-filter.active[data-bg]');
+      if (active && active.getAttribute('data-bg')) applyBg(active.getAttribute('data-bg'));
+    })();
+
+    // 回顶按钮
+    (function(){
+      var btn = document.getElementById('scrollTopBtn');
+      if (!btn) return;
+      window.addEventListener('scroll', function(){
+        if (window.scrollY > 400) btn.classList.add('show');
+        else btn.classList.remove('show');
+      });
+      btn.addEventListener('click', function(){
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+
+    // 手机返回键
+    (function(){
+      var btn = document.getElementById('mobileBack');
+      if (!btn) return;
+      btn.addEventListener('click', function(){
+        if (window.history.length > 1) history.back();
+        else window.location.href = '/';
+      });
+    })();
+  </script>
 </body>
 </html>
