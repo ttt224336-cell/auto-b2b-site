@@ -182,15 +182,11 @@
     .spec-list { list-style:none; margin:16px 0; }
     .spec-list li { padding:8px 0; border-bottom:1px solid #E5E7EB; font-size:14px; }
 
-    footer { background:var(--main); color:#CBD5E1; padding:48px 20px 28px; margin-top:40px; }
-    .foot-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:32px; }
-    .foot-col h4 { color:var(--accent); margin-bottom:14px; font-size:15px; font-weight:600; }
-    .foot-col p, .foot-col a { font-size:13px; line-height:1.85; color:#94A3B8; }
-    .foot-col a:hover { color:var(--accent); }
-    .foot-social-wrap { max-width:1100px; margin:28px auto 0; padding-top:22px; border-top:1px solid rgba(255,255,255,.12); text-align:center; }
-    .foot-social-wrap .social-label { font-size:12px; color:#64748B; margin-bottom:12px; letter-spacing:.04em; }
-    .social-bar { display:flex; flex-wrap:wrap; gap:18px; justify-content:center; }
-    .copyright { text-align:center; margin-top:22px; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); font-size:12px; color:#64748B; }
+    footer { background:var(--main); color:#CBD5E1; padding:40px 20px 24px; margin-top:40px; }
+    .foot-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:28px; }
+    .foot-col h4 { color:var(--accent); margin-bottom:12px; font-size:15px; }
+    .foot-col p, .foot-col a { font-size:13px; line-height:1.8; color:#94A3B8; }
+    .copyright { text-align:center; margin-top:28px; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); font-size:12px; color:#64748B; }
 
     .wa-float {
       position:fixed; bottom:24px; right:24px; z-index:90;
@@ -437,11 +433,7 @@
                     <span class="i18n-zh"><%= p.name_zh || p.name_en || '未命名' %></span>
                     <span class="i18n-en"><%= p.name_en || p.name_zh || 'Unnamed' %></span>
                   </h3>
-                  <div class="card-meta">
-                    OE: <%= p.oe || '-' %>
-                    <span class="i18n-zh"><%= p.model ? ' · ' + p.model : '' %></span>
-                    <span class="i18n-en"><% if (p.model) { var _m=String(p.model).replace(/[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]+/g,' ').replace(/\s+/g,' ').trim(); if(_m){ %> · <%= _m %><% } } %></span>
-                  </div>
+                  <div class="card-meta">OE: <%= p.oe || '-' %><span class="i18n-zh"><%= p.model ? ' · ' + p.model : '' %></span><span class="i18n-en"><% if(p.model){ var _em=String(p.model).replace(/[\u4e00-\u9fff]+/g,' ').replace(/\s+/g,' ').trim(); if(_em){ %> · <%= _em %><% }} %></span></div>
                   <div class="price" data-hkd="<%= p.price || 0 %>">
                     <span class="cur-sym">HK$</span><span class="cur-val"><%= Number(p.price||0).toFixed(2) %></span>
                   </div>
@@ -468,14 +460,6 @@
   </section>
 
   <% } else if (page === 'detail' && product) { %>
-  <%
-    function modelEn(m) {
-      if (!m) return '-';
-      var s = String(m).replace(/[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]+/g, ' ')
-        .replace(/[（）()]/g, ' ').replace(/\s*[/·|]+\s*/g, ' / ').replace(/\s+/g, ' ').trim();
-      return s || String(m);
-    }
-  %>
   <div class="detail-wrap">
     <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
       <a href="/"><span class="i18n-zh">首页</span><span class="i18n-en">Home</span></a> /
@@ -494,37 +478,26 @@
           <span class="i18n-en"><%= product.name_en || product.name_zh || 'Product Detail' %></span>
         </h1>
         <div class="meta">
-          <p><strong>OE:</strong> <%= product.oe || '-' %></p>
-          <p>
-            <strong><span class="i18n-zh">适用型号</span><span class="i18n-en">Compatible Models</span>:</strong>
+          <p><strong>OE：</strong><%= product.oe || '-' %></p>
+          <% function toEnModel(m){ if(!m)return '-'; var s=String(m).replace(/[\u4e00-\u9fff]+/g,' ').replace(/[\u3000-\u303f\uff00-\uffef]/g,' ').replace(/[（）()【】\[\]]/g,' ').replace(/\s+/g,' ').trim(); return s||'-'; } %>
+          <p><strong><span class="i18n-zh">适用型号</span><span class="i18n-en">Compatible Models</span>:</strong>
             <span class="i18n-zh"><%= product.model || '-' %></span>
-            <span class="i18n-en"><%= modelEn(product.model) %></span>
+            <span class="i18n-en"><%= toEnModel(product.model) %></span>
           </p>
-          <p>
-            <strong><span class="i18n-zh">库存</span><span class="i18n-en">Stock</span>:</strong>
-            <%= product.stock != null ? product.stock : '-' %>
-          </p>
-          <p>
-            <strong><span class="i18n-zh">价格</span><span class="i18n-en">Price</span>:</strong>
-            <span class="price" data-hkd="<%= product.price || 0 %>" style="font-size:inherit;display:inline;">
-              <span class="cur-sym">HK$</span><span class="cur-val"><%= Number(product.price||0).toFixed(2) %></span>
-            </span>
-          </p>
+          <p><strong><span class="i18n-zh">库存</span><span class="i18n-en">Stock</span>：</strong><%= product.stock != null ? product.stock : '-' %></p>
         </div>
         <div class="price" data-hkd="<%= product.price || 0 %>" style="font-size:22px;margin:12px 0;">
           <span class="cur-sym">HK$</span><span class="cur-val"><%= Number(product.price||0).toFixed(2) %></span>
         </div>
         <ul class="spec-list">
           <li>
-            <strong><span class="i18n-zh">产品描述</span><span class="i18n-en">Description</span>:</strong>
-            <div style="margin-top:6px;color:#4B5563;line-height:1.7;">
-              <span class="i18n-zh"><%= product.description_zh || product.description_en || '暂无描述' %></span>
-              <span class="i18n-en"><%= product.description_en || product.description_zh || 'No description' %></span>
-            </div>
+            <strong><span class="i18n-zh">描述</span><span class="i18n-en">Description</span>：</strong>
+            <span class="i18n-zh"><%= product.description_zh || product.description_en || '' %></span>
+            <span class="i18n-en"><%= product.description_en || product.description_zh || '' %></span>
           </li>
         </ul>
-        <a href="https://wa.me/<%= ((config && config.wa) || '85264960641').replace(/[^0-9]/g,'') %>?text=<%= encodeURIComponent('Inquiry: '+(product.name_en||product.name_zh||'')+' OE:'+(product.oe||'')) %>" class="btn btn-main" style="background:var(--blue);color:#fff;" target="_blank" rel="noopener">WhatsApp</a>
-        <a href="/#products" class="btn" style="margin-left:8px;background:#fff;border:1px solid #D1D5DB;color:var(--main);"><span class="i18n-zh">返回列表</span><span class="i18n-en">Back to List</span></a>
+        <a href="https://wa.me/<%= ((config && config.wa) || '85264960641').replace(/[^0-9]/g,'') %>?text=<%= encodeURIComponent('Inquiry: '+(product.name_zh||product.name_en||'')+' OE:'+(product.oe||'')) %>" class="btn btn-main" style="background:var(--blue);color:#fff;" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="/" class="btn" style="margin-left:8px;background:#fff;border:1px solid #D1D5DB;color:var(--main);"><span class="i18n-zh">返回列表</span><span class="i18n-en">Back</span></a>
       </div>
     </div>
   </div>
@@ -543,7 +516,7 @@
         <p><%= (config && config.address) || 'Hong Kong / Shenzhen' %></p>
         <p style="margin-top:8px;">
           <span class="i18n-zh">专业汽车零部件供应商，支持 OEM / ODM，服务全球客户。</span>
-          <span class="i18n-en">Professional auto parts supplier. OEM / ODM supported for global customers.</span>
+          <span class="i18n-en">Professional auto parts supplier. OEM / ODM for global customers.</span>
         </p>
       </div>
       <div class="foot-col">
@@ -552,8 +525,8 @@
         <p>WhatsApp: <%= (config && config.wa) || '' %></p>
       </div>
     </div>
-    <div class="foot-social-wrap">
-      <div class="social-label"><span class="i18n-zh">关注我们</span><span class="i18n-en">Follow Us</span></div>
+    <div class="foot-social-wrap" style="max-width:1100px;margin:28px auto 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);text-align:center;">
+      <div style="font-size:12px;color:#64748B;margin-bottom:12px;"><span class="i18n-zh">关注我们</span><span class="i18n-en">Follow Us</span></div>
       <div class="social-bar" id="socialBar">
         <% if (config && config.social1_img) { %>
         <a class="social-item" href="<%= config.social1_url || '#' %>" target="_blank" rel="noopener">
@@ -575,6 +548,7 @@
         <% } %>
       </div>
     </div>
+
     <div class="copyright"><%= (config && config.copyright_text) || '© 2026 AutoParts B2B. All rights reserved.' %></div>
   </footer>
 
@@ -681,7 +655,7 @@
           return '<a href="/product/'+p.id+'" class="card">' +
             '<div class="card-img"><img src="'+img+'" alt="" loading="lazy" onerror="this.src=\'https://via.placeholder.com/400x400?text=No+Image\'"></div>' +
             '<div class="card-body"><h3>'+name+'</h3>' +
-            (function(){ var meta='OE: '+(p.oe||'-'); if(p.model){ if(isEn){ var m=String(p.model).replace(/[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]+/g,' ').replace(/\s+/g,' ').trim(); if(m) meta+=' · '+m; } else meta+=' · '+p.model; } return '<div class="card-meta">'+meta+'</div>'; })() +
+            '<div class="card-meta">OE: '+(p.oe||'-')+' · '+(p.model||'')+'</div>' +
             '<div class="price" data-hkd="'+(p.price||0)+'"><span class="cur-sym">HK$</span><span class="cur-val">'+price+'</span></div>' +
             '</div></a>';
         }).join('');
