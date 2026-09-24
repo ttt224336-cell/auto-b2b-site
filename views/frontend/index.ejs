@@ -345,9 +345,43 @@
         max-width: 1280px;
       }
     }
+  
+    /* === v2 upgrades: page bg, transparency, carousel effects, category bottom bg === */
+    body.page-bg-full {
+      background-image: url('<%= (config && config.page_bg) ? config.page_bg : "" %>');
+      background-size: cover; background-position: center; background-attachment: fixed;
+    }
+    body.page-bg-full::before {
+      content: ''; position: fixed; inset: 0; z-index: -1;
+      background: rgba(255,255,255, <%= (config && config.page_bg_opacity) ? config.page_bg_opacity : '0.85' %>);
+      pointer-events: none;
+    }
+    .factory-slider .slide.effect-fade { transition: opacity .7s ease; }
+    .factory-slider .slide.effect-slide { transition: transform .6s ease, opacity .6s; transform: translateX(30px); }
+    .factory-slider .slide.effect-slide.active { transform: translateX(0); }
+    .factory-slider .slide.effect-zoom { transition: transform .7s ease, opacity .7s; transform: scale(1.08); }
+    .factory-slider .slide.effect-zoom.active { transform: scale(1); }
+    .factory-slider .slide.effect-flip { transition: transform .7s, opacity .7s; transform: rotateY(90deg); }
+    .factory-slider .slide.effect-flip.active { transform: rotateY(0); }
+    .factory-slider .slide.effect-cube { transition: transform .7s cubic-bezier(.4,0,.2,1), opacity .7s; transform: perspective(800px) rotateX(20deg) scale(.95); }
+    .factory-slider .slide.effect-cube.active { transform: perspective(800px) rotateX(0) scale(1); }
+    .products-section.has-cat-bg {
+      background-image: linear-gradient(180deg, rgba(247,249,252,.75), rgba(238,243,249,.82)), var(--cat-bg) !important;
+      background-size: cover !important; background-position: center !important; transition: background-image .5s ease;
+    }
+    .btn { transition: transform .15s, box-shadow .15s; }
+    .btn:active { transform: scale(.97); }
+    @media (max-width: 768px) {
+      .products-layout { grid-template-columns: 1fr !important; }
+      .sidebar { position: static !important; display: flex; flex-wrap: wrap; gap: 8px; }
+      .sidebar a { flex: 1 1 auto; text-align: center; }
+      .product-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important; }
+      .factory-grid { grid-template-columns: 1fr !important; }
+    }
+
   </style>
 </head>
-<body>
+<body class="<%= (config && config.page_bg_full==='1' && config.page_bg) ? 'page-bg-full' : '' %>">
   <!-- 汇率数据（相对 1 HKD） -->
   <script>
     window.__RATES = {
@@ -491,7 +525,8 @@
               <% if (typeof categories !== 'undefined' && categories && categories.length) { %>
                 <% categories.forEach(c => { %>
                   <a href="/?cat=<%= c.id %><%= keyword ? '&q='+encodeURIComponent(keyword) : '' %>"
-                     class="<%= String(catId) === String(c.id) ? 'active' : '' %>">
+                     class="<%= String(catId) === String(c.id) ? 'active' : '' %>"
+                     data-bg="<%= c.bg_image || '' %>">
                     <%= c.name_zh || c.name %>
                   </a>
                 <% }) %>
@@ -697,14 +732,45 @@
       const dots = document.querySelectorAll('.slider-dots span');
       if (!slides.length) return;
       let idx = 0;
+      
+      // v2 carousel effects + random
+      const effectList = ['fade','slide','zoom','flip','cube'];
+      let currentEffect = '<%= (config && config.carousel_effect) || "fade" %>';
+      const randomMode = '<%= (config && config.carousel_random) || "0" %>' === '1';
+      function applyEffect(slides, idx) {
+        if (randomMode) currentEffect = effectList[Math.floor(Math.random()*effectList.length)];
+        slides.forEach((s,i) => {
+          s.className = 'slide effect-' + currentEffect + (i===idx ? ' active' : '');
+        });
+      }
+      // category bottom bg switch
+      document.querySelectorAll('.cat-link, .sidebar a[data-bg]').forEach(a => {
+        a.addEventListener('click', function(e) {
+          const bg = this.getAttribute('data-bg');
+          const sec = document.getElementById('products');
+          if (sec && bg) {
+            sec.style.setProperty('--cat-bg', 'url('+bg+')');
+            sec.classList.add('has-cat-bg');
+          }
+        });
+      });
+      // init first cat bg if any
+      (function(){
+        const first = document.querySelector('.sidebar a[data-bg]');
+        const sec = document.getElementById('products');
+        if (first && sec && first.getAttribute('data-bg')) {
+          sec.style.setProperty('--cat-bg', 'url('+first.getAttribute('data-bg')+')');
+        }
+      })();
+
       const delay = <%= (config && config.carousel_delay) ? (parseInt(config.carousel_delay)||4) * 1000 : 4500 %>;
       function show(i) {
-        slides.forEach(s => s.classList.remove('active'));
+        applyEffect(slides, i);
         dots.forEach(d => d.classList.remove('active'));
-        slides[i].classList.add('active');
         if (dots[i]) dots[i].classList.add('active');
         idx = i;
       }
+      applyEffect(slides, 0);
       dots.forEach(d => d.addEventListener('click', function(){ show(+d.dataset.index); }));
       if (slides.length > 1) setInterval(function(){ show((idx + 1) % slides.length); }, delay);
     })();
