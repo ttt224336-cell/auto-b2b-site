@@ -67,6 +67,27 @@
     <% if (result && result.error) { %><div class="alert alert-error"><%= result.error %></div><% } %>
     <% if (result && result.success) { %><div class="alert alert-success"><%= result.message %></div><% } %>
 
+    
+    <div class="card" style="border:2px solid #1E6BD9;background:linear-gradient(135deg,#EFF6FF,#fff);margin-bottom:22px;">
+      <h3 style="color:#0A2F5F;">💾 完整业务备份 / 一键恢复</h3>
+      <p class="hint" style="margin-bottom:14px;">
+        <strong>推荐使用。</strong>备份内容：分类、产品、工厂展示、<b>全部系统设置</b>、询盘记录，以及 <code>uploads</code> 里已上传的图片。<br>
+        <strong>不包含</strong>网站源代码（app.js、模板等）。换代码 / 重新部署后，用备份包一键恢复即可，不必逐项重新上传。
+      </p>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:18px;">
+        <a href="/admin/datapack/full-backup" class="btn btn-blue" style="font-size:15px;padding:12px 22px;">⬇️ 下载完整备份（ZIP）</a>
+        <span style="font-size:12px;color:#6B7280;">建议每次上架或改设置后点一次</span>
+      </div>
+      <form method="post" action="/admin/datapack/full-restore" enctype="multipart/form-data" style="border-top:1px dashed #BFDBFE;padding-top:16px;">
+        <label>恢复备份包（.zip 或仅 data 的 .json）</label>
+        <input type="file" name="backup_file" accept=".zip,.json,application/zip,application/json" required>
+        <label class="check-label"><input type="checkbox" name="clear" value="1"> 恢复前清空现有分类与产品（慎用）</label>
+        <label class="check-label"><input type="checkbox" name="restore_inquiries" value="1"> 同时恢复询盘记录</label>
+        <p class="hint">系统设置会自动写回。图片会恢复到 uploads 目录。</p>
+        <button type="submit" class="btn btn-green" style="margin-top:8px;">🚀 一键完整恢复</button>
+      </form>
+    </div>
+
     <div class="grid-2">
       <div class="card">
         <h3>导出当前数据</h3>
