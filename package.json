@@ -1,13 +1,13 @@
 {
   "name": "autoparts-b2b",
-  "version": "2.0.1",
-  "description": "汽配B2B完整系统 - 修复前台对接 + Render 部署优化",
+  "version": "2.0.2",
+  "description": "汽配B2B完整系统 - Render 部署优化",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": "20.x"
   },
   "dependencies": {
     "axios": "^1.7.7",
