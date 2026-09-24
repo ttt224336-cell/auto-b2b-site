@@ -258,12 +258,15 @@ router.post('/settings', requireLogin, upload.fields([
   { name: 'hero_bg_file', maxCount: 1 },
   { name: 'products_bg_file', maxCount: 1 },
   { name: 'page_bg_file', maxCount: 1 },
+  { name: 'inquiry_bg_file', maxCount: 1 },
   { name: 'social1_file', maxCount: 1 },
   { name: 'social2_file', maxCount: 1 },
   { name: 'social3_file', maxCount: 1 }
 ]), (req, res) => {
   const fields = [
-    'site_name', 'company_name', 'contact_email', 'contact_whatsapp', 'copyright_text', 'address',
+    'site_name', 'company_name', 'contact_email', 'contact_whatsapp', 'contact_phone', 'copyright_text', 'address', 'work_hours',
+    'about_zh', 'about_en',
+    'inquiry_title_zh', 'inquiry_title_en', 'inquiry_desc_zh', 'inquiry_desc_en', 'inquiry_bg',
     'hero_bg', 'hero_bg_opacity', 'products_bg', 'products_bg_opacity',
     'page_bg', 'page_bg_opacity', 'page_bg_full',
     'factory_images', 'carousel_delay', 'carousel_effect', 'carousel_random',
@@ -275,6 +278,7 @@ router.post('/settings', requireLogin, upload.fields([
     if (req.files.hero_bg_file) req.body.hero_bg = '/uploads/' + req.files.hero_bg_file[0].filename;
     if (req.files.products_bg_file) req.body.products_bg = '/uploads/' + req.files.products_bg_file[0].filename;
     if (req.files.page_bg_file) req.body.page_bg = '/uploads/' + req.files.page_bg_file[0].filename;
+    if (req.files.inquiry_bg_file) req.body.inquiry_bg = '/uploads/' + req.files.inquiry_bg_file[0].filename;
     if (req.files.social1_file) req.body.social1_img = '/uploads/' + req.files.social1_file[0].filename;
     if (req.files.social2_file) req.body.social2_img = '/uploads/' + req.files.social2_file[0].filename;
     if (req.files.social3_file) req.body.social3_img = '/uploads/' + req.files.social3_file[0].filename;
