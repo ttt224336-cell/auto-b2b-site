@@ -91,8 +91,16 @@
               <input type="file" name="hero_bg_file" accept="image/*">
             </div>
             <% if(config.hero_bg){ %><img src="<%= config.hero_bg %>" class="img-preview" alt=""><% } %>
-            <label>透明度</label>
-            <input type="number" name="hero_bg_opacity" value="<%= config.hero_bg_opacity||'0.35' %>" step="0.05" min="0" max="1">
+            
+            <label>Hero 背景透明度 <span id="val_hero_bg_opacity" style="color:#1E6BD9;font-weight:600;"></span></label>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:11px;color:#6B7280;">透明</span>
+              <input type="range" name="hero_bg_opacity" id="rng_hero_bg_opacity" min="0" max="1" step="0.05" value="<%= config.hero_bg_opacity||'0.35' %>"
+                style="flex:1;accent-color:#1E6BD9;" oninput="document.getElementById('val_hero_bg_opacity').textContent=this.value">
+              <span style="font-size:11px;color:#6B7280;">不透明</span>
+            </div>
+            <script>document.getElementById('val_hero_bg_opacity').textContent=document.getElementById('rng_hero_bg_opacity').value;</script>
+" step="0.05" min="0" max="1">
           </div>
           <div>
             <label>产品区背景图</label>
@@ -101,8 +109,16 @@
               <input type="file" name="products_bg_file" accept="image/*">
             </div>
             <% if(config.products_bg){ %><img src="<%= config.products_bg %>" class="img-preview" alt=""><% } %>
-            <label>透明度</label>
-            <input type="number" name="products_bg_opacity" value="<%= config.products_bg_opacity||'0.25' %>" step="0.05" min="0" max="1">
+            
+            <label>产品区背景透明度 <span id="val_products_bg_opacity" style="color:#1E6BD9;font-weight:600;"></span></label>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:11px;color:#6B7280;">透明</span>
+              <input type="range" name="products_bg_opacity" id="rng_products_bg_opacity" min="0" max="1" step="0.05" value="<%= config.products_bg_opacity||'0.25' %>"
+                style="flex:1;accent-color:#1E6BD9;" oninput="document.getElementById('val_products_bg_opacity').textContent=this.value">
+              <span style="font-size:11px;color:#6B7280;">不透明</span>
+            </div>
+            <script>document.getElementById('val_products_bg_opacity').textContent=document.getElementById('rng_products_bg_opacity').value;</script>
+" step="0.05" min="0" max="1">
           </div>
           <div>
             <label>整页背景图</label>
@@ -111,8 +127,16 @@
               <input type="file" name="page_bg_file" accept="image/*">
             </div>
             <% if(config.page_bg){ %><img src="<%= config.page_bg %>" class="img-preview" alt=""><% } %>
-            <label>透明度</label>
-            <input type="number" name="page_bg_opacity" value="<%= config.page_bg_opacity||'0.15' %>" step="0.05" min="0" max="1">
+            
+            <label>整页背景透明度 <span id="val_page_bg_opacity" style="color:#1E6BD9;font-weight:600;"></span></label>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:11px;color:#6B7280;">透明</span>
+              <input type="range" name="page_bg_opacity" id="rng_page_bg_opacity" min="0" max="1" step="0.05" value="<%= config.page_bg_opacity||'0.15' %>"
+                style="flex:1;accent-color:#1E6BD9;" oninput="document.getElementById('val_page_bg_opacity').textContent=this.value">
+              <span style="font-size:11px;color:#6B7280;">不透明</span>
+            </div>
+            <script>document.getElementById('val_page_bg_opacity').textContent=document.getElementById('rng_page_bg_opacity').value;</script>
+" step="0.05" min="0" max="1">
             <label class="check-label" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
               <input type="checkbox" name="page_bg_full" value="1" <%= config.page_bg_full==='1'?'checked':'' %>> 整页可透（背景固定覆盖全屏）
             </label>
@@ -184,16 +208,19 @@
             <label>图标1 图片</label>
             <div class="file-row"><input type="text" name="social1_img" value="<%= config.social1_img||'' %>"><input type="file" name="social1_file" accept="image/*"></div>
             <label>链接1</label><input name="social1_url" value="<%= config.social1_url||'' %>">
+            <label>显示文字1（前台显示在图标下方）</label><input name="social1_text" value="<%= config.social1_text||'' %>" placeholder="如：WhatsApp / 官网">
           </div>
           <div>
             <label>图标2 图片</label>
             <div class="file-row"><input type="text" name="social2_img" value="<%= config.social2_img||'' %>"><input type="file" name="social2_file" accept="image/*"></div>
             <label>链接2</label><input name="social2_url" value="<%= config.social2_url||'' %>">
+            <label>显示文字2（前台显示在图标下方）</label><input name="social2_text" value="<%= config.social2_text||'' %>" placeholder="如：WhatsApp / 官网">
           </div>
           <div>
             <label>图标3 图片</label>
             <div class="file-row"><input type="text" name="social3_img" value="<%= config.social3_img||'' %>"><input type="file" name="social3_file" accept="image/*"></div>
             <label>链接3</label><input name="social3_url" value="<%= config.social3_url||'' %>">
+            <label>显示文字3（前台显示在图标下方）</label><input name="social3_text" value="<%= config.social3_text||'' %>" placeholder="如：WhatsApp / 官网">
           </div>
         </div>
       </div>
