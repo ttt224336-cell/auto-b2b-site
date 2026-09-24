@@ -16,25 +16,14 @@ function requireLogin(req, res, next) {
 // ---------- 登录 ----------
 router.get('/login', (req, res) => {
   if (req.session && req.session.admin) return res.redirect('/admin/product');
-  db.all('SELECT key, value FROM config', [], (err, rows) => {
-    const config = {};
-    (rows || []).forEach(r => { config[r.key] = r.value; });
-    res.render('admin/login', { error: null, success: null, config });
-  });
+  res.render('admin/login', { error: null, success: null });
 });
 
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
-  const renderLogin = (error) => {
-    db.all('SELECT key, value FROM config', [], (e, rows) => {
-      const config = {};
-      (rows || []).forEach(r => { config[r.key] = r.value; });
-      res.render('admin/login', { error, success: null, config });
-    });
-  };
   db.get('SELECT * FROM admins WHERE username = ?', [username], (err, admin) => {
     if (err || !admin || !bcrypt.compareSync(password, admin.password)) {
-      return renderLogin('用户名或密码错误');
+      return res.render('admin/login', { error: '用户名或密码错误', success: null });
     }
     req.session.admin = { id: admin.id, username: admin.username, role: admin.role };
     res.redirect('/admin/product');
@@ -42,51 +31,19 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/change-password', requireLogin, (req, res) => {
-  const { oldPassword, newPassword, newUsername } = req.body || {};
-  if (!oldPassword || !newPassword || String(newPassword).length < 6) {
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword || newPassword.length < 6) {
     return res.json({ success: false, message: '参数错误，新密码至少6位' });
   }
-  const currentUser = (req.session.admin && req.session.admin.username) || 'admin';
-  db.get('SELECT * FROM admins WHERE username = ?', [currentUser], (err, admin) => {
+  db.get('SELECT * FROM admins WHERE username = ?', ['admin'], (err, admin) => {
     if (err || !admin) return res.json({ success: false, message: '用户不存在' });
     if (!bcrypt.compareSync(oldPassword, admin.password)) {
       return res.json({ success: false, message: '当前密码错误' });
     }
-    const hash = bcrypt.hashSync(String(newPassword), 10);
-    const uname = (newUsername && String(newUsername).trim()) ? String(newUsername).trim() : currentUser;
-    if (uname !== currentUser) {
-      db.get('SELECT id FROM admins WHERE username = ?', [uname], (e2, exists) => {
-        if (exists) return res.json({ success: false, message: '用户名已被占用' });
-        db.run('UPDATE admins SET username = ?, password = ? WHERE id = ?', [uname, hash, admin.id], (err3) => {
-          if (err3) return res.json({ success: false, message: '修改失败' });
-          req.session.admin.username = uname;
-          res.json({ success: true, message: '账号与密码已更新，请牢记新账号' });
-        });
-      });
-    } else {
-      db.run('UPDATE admins SET password = ? WHERE id = ?', [hash, admin.id], (err2) => {
-        if (err2) return res.json({ success: false, message: '修改失败' });
-        res.json({ success: true, message: '密码修改成功' });
-      });
-    }
-  });
-});
-
-// 登录页也可用：凭旧账号密码改密（未登录）
-router.post('/change-password-public', (req, res) => {
-  const { username, oldPassword, newPassword } = req.body || {};
-  if (!username || !oldPassword || !newPassword || String(newPassword).length < 6) {
-    return res.json({ success: false, message: '请填写完整，新密码至少6位' });
-  }
-  db.get('SELECT * FROM admins WHERE username = ?', [username], (err, admin) => {
-    if (err || !admin) return res.json({ success: false, message: '账号不存在' });
-    if (!bcrypt.compareSync(oldPassword, admin.password)) {
-      return res.json({ success: false, message: '原密码错误' });
-    }
-    const hash = bcrypt.hashSync(String(newPassword), 10);
-    db.run('UPDATE admins SET password = ? WHERE id = ?', [hash, admin.id], (err2) => {
+    const hash = bcrypt.hashSync(newPassword, 10);
+    db.run('UPDATE admins SET password = ? WHERE username = ?', [hash, 'admin'], (err2) => {
       if (err2) return res.json({ success: false, message: '修改失败' });
-      res.json({ success: true, message: '密码修改成功，请用新密码登录' });
+      res.json({ success: true, message: '密码修改成功' });
     });
   });
 });
@@ -302,7 +259,6 @@ router.post('/settings', requireLogin, upload.fields([
   { name: 'products_bg_file', maxCount: 1 },
   { name: 'page_bg_file', maxCount: 1 },
   { name: 'inquiry_bg_file', maxCount: 1 },
-  { name: 'login_bg_file', maxCount: 1 },
   { name: 'social1_file', maxCount: 1 },
   { name: 'social2_file', maxCount: 1 },
   { name: 'social3_file', maxCount: 1 }
@@ -313,7 +269,6 @@ router.post('/settings', requireLogin, upload.fields([
     'inquiry_title_zh', 'inquiry_title_en', 'inquiry_desc_zh', 'inquiry_desc_en', 'inquiry_bg',
     'hero_bg', 'hero_bg_opacity', 'products_bg', 'products_bg_opacity',
     'page_bg', 'page_bg_opacity', 'page_bg_full',
-    'login_bg', 'login_bg_opacity',
     'factory_images', 'carousel_delay', 'carousel_effect', 'carousel_random',
     'social1_img', 'social1_url', 'social1_text', 'social2_img', 'social2_url', 'social2_text', 'social3_img', 'social3_url', 'social3_text',
     'rate_usd', 'rate_cny', 'rate_krw', 'rate_jpy', 'rate_auto'
@@ -324,7 +279,6 @@ router.post('/settings', requireLogin, upload.fields([
     if (req.files.products_bg_file) req.body.products_bg = '/uploads/' + req.files.products_bg_file[0].filename;
     if (req.files.page_bg_file) req.body.page_bg = '/uploads/' + req.files.page_bg_file[0].filename;
     if (req.files.inquiry_bg_file) req.body.inquiry_bg = '/uploads/' + req.files.inquiry_bg_file[0].filename;
-    if (req.files.login_bg_file) req.body.login_bg = '/uploads/' + req.files.login_bg_file[0].filename;
     if (req.files.social1_file) req.body.social1_img = '/uploads/' + req.files.social1_file[0].filename;
     if (req.files.social2_file) req.body.social2_img = '/uploads/' + req.files.social2_file[0].filename;
     if (req.files.social3_file) req.body.social3_img = '/uploads/' + req.files.social3_file[0].filename;
@@ -705,5 +659,293 @@ router.get('/export/inquiries', requireLogin, (req, res) => {
     res.send(bom + header + lines.join('\n'));
   });
 });
+
+
+// ---------- 完整业务备份（数据+图片，不含网站代码） ----------
+router.get('/datapack/full-backup', requireLogin, (req, res) => {
+  const os = require('os');
+  const { execSync } = require('child_process');
+  const tmpRoot = path.join(os.tmpdir(), 'ap-backup-' + Date.now());
+  const uploadsSrc = path.join(__dirname, '../public/uploads');
+  try {
+    fs.mkdirSync(tmpRoot, { recursive: true });
+    const packUploads = path.join(tmpRoot, 'uploads');
+    fs.mkdirSync(packUploads, { recursive: true });
+
+    db.all('SELECT * FROM categories ORDER BY id', [], (e1, cats) => {
+      db.all('SELECT * FROM products ORDER BY id', [], (e2, prods) => {
+        db.get('SELECT * FROM factory_content WHERE id=1', [], (e3, factory) => {
+          db.all('SELECT * FROM config', [], (e4, confRows) => {
+            db.all('SELECT id, product_id, product_name, name, email, whatsapp, message, status, reply, created_at FROM inquiries ORDER BY id', [], (e5, inquiries) => {
+              const config = {};
+              (confRows || []).forEach(r => { config[r.key] = r.value; });
+              const data = {
+                version: '3.0-full',
+                type: 'full-business-backup',
+                exported_at: new Date().toISOString(),
+                note: '业务数据完整备份：分类/产品/工厂/系统设置/询盘。不含网站源代码。',
+                categories: cats || [],
+                products: prods || [],
+                factory: factory || {},
+                config: config,
+                inquiries: inquiries || []
+              };
+              fs.writeFileSync(path.join(tmpRoot, 'data.json'), JSON.stringify(data, null, 2), 'utf8');
+
+              // 复制 uploads（仅文件，不递归异常）
+              try {
+                if (fs.existsSync(uploadsSrc)) {
+                  const files = fs.readdirSync(uploadsSrc);
+                  files.forEach(name => {
+                    const src = path.join(uploadsSrc, name);
+                    try {
+                      if (fs.statSync(src).isFile()) {
+                        fs.copyFileSync(src, path.join(packUploads, name));
+                      }
+                    } catch (e) {}
+                  });
+                }
+              } catch (e) {}
+
+              const zipName = 'auto-b2b-full-backup-' + new Date().toISOString().slice(0, 10) + '.zip';
+              const zipPath = path.join(os.tmpdir(), zipName);
+              try {
+                execSync('zip -r -q "' + zipPath + '" data.json uploads', { cwd: tmpRoot, timeout: 120000 });
+              } catch (zipErr) {
+                // 无 zip 命令时退回仅 JSON（图片路径仍保留）
+                try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e) {}
+                res.setHeader('Content-Type', 'application/json');
+                res.setHeader('Content-Disposition', 'attachment; filename=auto-b2b-full-backup.json');
+                return res.send(JSON.stringify(data, null, 2));
+              }
+
+              res.download(zipPath, zipName, (err) => {
+                try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e) {}
+                try { fs.unlinkSync(zipPath); } catch (e) {}
+              });
+            });
+          });
+        });
+      });
+    });
+  } catch (e) {
+    try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e2) {}
+    res.status(500).send('备份失败: ' + e.message);
+  }
+});
+
+router.post('/datapack/full-restore', requireLogin, upload.backup.single('backup_file'), (req, res) => {
+  const os = require('os');
+  const { execSync } = require('child_process');
+  const uploadsDir = path.join(__dirname, '../public/uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+  const fail = (msg) => res.render('admin/datapack', {
+    page: 'datapack', admin: req.session.admin,
+    result: { error: msg }
+  });
+
+  if (!req.file) return fail('请上传备份文件（.zip 或 .json）');
+
+  const filePath = req.file.path;
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  let data = null;
+  const tmpRoot = path.join(os.tmpdir(), 'ap-restore-' + Date.now());
+
+  try {
+    if (ext === '.json') {
+      data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } else {
+      fs.mkdirSync(tmpRoot, { recursive: true });
+      try {
+        execSync('unzip -o -q "' + filePath + '" -d "' + tmpRoot + '"', { timeout: 120000 });
+      } catch (e) {
+        try { fs.unlinkSync(filePath); } catch (e2) {}
+        return fail('解压失败，请确认是本系统导出的 zip 备份包');
+      }
+      const dataPath = path.join(tmpRoot, 'data.json');
+      if (!fs.existsSync(dataPath)) {
+        // 可能解压在子目录
+        const walk = (dir) => {
+          for (const n of fs.readdirSync(dir)) {
+            const p = path.join(dir, n);
+            if (fs.statSync(p).isDirectory()) {
+              const f = walk(p);
+              if (f) return f;
+            } else if (n === 'data.json') return p;
+          }
+          return null;
+        };
+        const found = walk(tmpRoot);
+        if (!found) {
+          try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e) {}
+          try { fs.unlinkSync(filePath); } catch (e) {}
+          return fail('备份包内未找到 data.json');
+        }
+        data = JSON.parse(fs.readFileSync(found, 'utf8'));
+      } else {
+        data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+      }
+
+      // 恢复图片
+      const upSrc = path.join(tmpRoot, 'uploads');
+      if (fs.existsSync(upSrc)) {
+        fs.readdirSync(upSrc).forEach(name => {
+          const src = path.join(upSrc, name);
+          try {
+            if (fs.statSync(src).isFile()) {
+              fs.copyFileSync(src, path.join(uploadsDir, name));
+            }
+          } catch (e) {}
+        });
+      } else {
+        // 找任意 uploads 目录
+        const findUp = (dir) => {
+          for (const n of fs.readdirSync(dir)) {
+            const p = path.join(dir, n);
+            if (fs.statSync(p).isDirectory()) {
+              if (n === 'uploads') return p;
+              const f = findUp(p);
+              if (f) return f;
+            }
+          }
+          return null;
+        };
+        const up2 = findUp(tmpRoot);
+        if (up2) {
+          fs.readdirSync(up2).forEach(name => {
+            const src = path.join(up2, name);
+            try {
+              if (fs.statSync(src).isFile()) fs.copyFileSync(src, path.join(uploadsDir, name));
+            } catch (e) {}
+          });
+        }
+      }
+    }
+  } catch (e) {
+    try { fs.unlinkSync(filePath); } catch (e2) {}
+    try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e2) {}
+    return fail('读取备份失败: ' + e.message);
+  }
+
+  try { fs.unlinkSync(filePath); } catch (e) {}
+
+  // 复用合并导入逻辑（含配置覆盖、询盘可选）
+  const clear = req.body.clear === '1';
+  const restoreInquiries = req.body.restore_inquiries === '1';
+
+  const finishOk = (extra) => {
+    try { fs.rmSync(tmpRoot, { recursive: true, force: true }); } catch (e) {}
+    res.render('admin/datapack', {
+      page: 'datapack', admin: req.session.admin,
+      result: {
+        success: true,
+        message: '完整恢复成功！分类/产品/工厂/系统设置已写回' + (extra || '') + '。请刷新前台查看。'
+      }
+    });
+  };
+
+  const run = () => {
+    const cats = data.categories || [];
+    const prods = data.products || [];
+    const catMap = {};
+    let ci = 0;
+
+    function nextCat() {
+      if (ci >= cats.length) return nextProd();
+      const c0 = cats[ci++];
+      const nameZh = c0.name_zh || c0.name || '';
+      db.get('SELECT id FROM categories WHERE name_zh = ?', [nameZh], function (err, row) {
+        if (row && row.id) {
+          db.run('UPDATE categories SET name_en=?, sort_order=?, status=?, bg_image=? WHERE id=?',
+            [c0.name_en || '', c0.sort_order || 0, c0.status != null ? c0.status : 1, c0.bg_image || '', row.id],
+            () => { catMap[c0.id] = row.id; nextCat(); });
+        } else {
+          db.run('INSERT INTO categories (name_zh, name_en, sort_order, status, bg_image) VALUES (?,?,?,?,?)',
+            [nameZh, c0.name_en || '', c0.sort_order || 0, c0.status != null ? c0.status : 1, c0.bg_image || ''],
+            function () { catMap[c0.id] = this.lastID; nextCat(); });
+        }
+      });
+    }
+
+    let pi = 0;
+    function nextProd() {
+      if (pi >= prods.length) return doFactory();
+      const p = prods[pi++];
+      const newCatId = catMap[p.category_id] != null ? catMap[p.category_id] : (p.category_id || 0);
+      const oe = p.oe || '';
+      const nameZh = p.name_zh || p.name || '';
+      const findSql = oe ? 'SELECT id FROM products WHERE oe = ? LIMIT 1' : 'SELECT id FROM products WHERE name_zh = ? LIMIT 1';
+      const findArg = oe || nameZh;
+      const vals = [
+        newCatId, nameZh, p.name_en || '', oe, p.model || '',
+        p.price || 0, p.stock || 0, p.image || '', p.images || '',
+        p.description_zh || '', p.description_en || '',
+        p.seo_title || '', p.seo_keywords || '', p.seo_desc || '',
+        p.status != null ? p.status : 1, p.sort_order || 0
+      ];
+      db.get(findSql, [findArg], function (err, row) {
+        if (row && row.id) {
+          db.run(`UPDATE products SET category_id=?, name_zh=?, name_en=?, oe=?, model=?, price=?, stock=?,
+            image=?, images=?, description_zh=?, description_en=?, seo_title=?, seo_keywords=?, seo_desc=?,
+            status=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`, vals.concat([row.id]), () => nextProd());
+        } else {
+          db.run(`INSERT INTO products
+            (category_id, name_zh, name_en, oe, model, price, stock, image, images,
+             description_zh, description_en, seo_title, seo_keywords, seo_desc, status, sort_order)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, vals, () => nextProd());
+        }
+      });
+    }
+
+    function doFactory() {
+      if (!data.factory) return doConfig();
+      const f = data.factory;
+      db.run(`UPDATE factory_content SET title_zh=?, title_en=?, intro_zh=?, intro_en=?,
+        advantages_zh=?, advantages_en=?, images=?, updated_at=CURRENT_TIMESTAMP WHERE id=1`,
+        [f.title_zh || '', f.title_en || '', f.intro_zh || '', f.intro_en || '',
+         f.advantages_zh || '', f.advantages_en || '', f.images || ''],
+        () => doConfig());
+    }
+
+    function doConfig() {
+      if (data.config) {
+        const stmt = db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)');
+        Object.entries(data.config).forEach(([k, v]) => {
+          if (v !== undefined && v !== null) stmt.run(k, String(v));
+        });
+        stmt.finalize(() => doInquiries());
+      } else doInquiries();
+    }
+
+    function doInquiries() {
+      if (!restoreInquiries || !data.inquiries || !data.inquiries.length) return finishOk('');
+      let ii = 0;
+      const list = data.inquiries;
+      function nextI() {
+        if (ii >= list.length) return finishOk('；询盘 ' + list.length + ' 条已恢复');
+        const r = list[ii++];
+        db.run(
+          `INSERT INTO inquiries (product_id, product_name, name, email, whatsapp, message, status, reply, created_at)
+           VALUES (?,?,?,?,?,?,?,?,?)`,
+          [r.product_id || null, r.product_name || '', r.name || '', r.email || '', r.whatsapp || '',
+           r.message || '', r.status || 'pending', r.reply || '', r.created_at || null],
+          () => nextI()
+        );
+      }
+      nextI();
+    }
+
+    if (cats.length) nextCat();
+    else nextProd();
+  };
+
+  if (clear) {
+    db.run('DELETE FROM products', [], () => {
+      db.run('DELETE FROM categories', [], () => run());
+    });
+  } else run();
+});
+
 
 module.exports = router;
