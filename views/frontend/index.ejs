@@ -211,11 +211,49 @@
       .cat-list a { margin:0; }
       .product-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
     }
+
+    /* 回顶按钮 */
+    .scroll-top {
+      position:fixed; bottom:90px; right:24px; z-index:89;
+      width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+      background:var(--main); color:#fff; font-size:20px; box-shadow:0 4px 14px rgba(0,0,0,.2);
+      display:none; align-items:center; justify-content:center;
+      transition: opacity .2s, background .2s;
+    }
+    .scroll-top.show { display:flex; }
+    .scroll-top:hover { background:var(--blue); }
+    /* 手机返回 */
+    .mobile-back {
+      display:none; position:fixed; top:12px; left:12px; z-index:110;
+      width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
+      background:rgba(10,47,95,.9); color:#fff; font-size:18px;
+      align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.25);
+    }
+    @media (max-width:768px) {
+      .mobile-back { display:flex; }
+      .header-inner { padding-left:56px; }
+    }
+    /* 社交图标 */
+    .social-bar {
+      display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:16px;
+    }
+    .social-item {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      text-decoration:none; color:#94A3B8; font-size:12px; min-width:64px;
+    }
+    .social-item img {
+      width:40px; height:40px; border-radius:50%; object-fit:cover;
+      border:2px solid rgba(255,255,255,.2); background:#fff;
+    }
+    .social-item:hover { color:var(--accent); }
+    .social-item:hover img { border-color:var(--accent); }
+
   </style>
 </head>
 <body class="<%= (config && config.page_bg_full==='1' && config.page_bg) ? 'page-bg-full' : '' %>"
   <% if (config && config.page_bg_full==='1' && config.page_bg) { %>style="background-image:url('<%= config.page_bg %>')"<% } %>>
 
+  <button type="button" class="mobile-back" id="mobileBack" aria-label="Back">←</button>
   <header class="header">
     <div class="header-inner">
       <a href="/" class="logo"><%= (config && config.site_name) || 'AutoParts B2B' %></a>
@@ -314,18 +352,56 @@
     <style>
       .products-section.has-bg::before { background-image: var(--pbg, none); }
       .products-section.has-cat-bg::before { background-image: var(--cat-bg) !important; opacity: 0.22; }
-    </style>
+  
+    /* 回顶按钮 */
+    .scroll-top {
+      position:fixed; bottom:90px; right:24px; z-index:89;
+      width:44px; height:44px; border-radius:50%; border:none; cursor:pointer;
+      background:var(--main); color:#fff; font-size:20px; box-shadow:0 4px 14px rgba(0,0,0,.2);
+      display:none; align-items:center; justify-content:center;
+      transition: opacity .2s, background .2s;
+    }
+    .scroll-top.show { display:flex; }
+    .scroll-top:hover { background:var(--blue); }
+    /* 手机返回 */
+    .mobile-back {
+      display:none; position:fixed; top:12px; left:12px; z-index:110;
+      width:40px; height:40px; border-radius:50%; border:none; cursor:pointer;
+      background:rgba(10,47,95,.9); color:#fff; font-size:18px;
+      align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.25);
+    }
+    @media (max-width:768px) {
+      .mobile-back { display:flex; }
+      .header-inner { padding-left:56px; }
+    }
+    /* 社交图标 */
+    .social-bar {
+      display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:16px;
+    }
+    .social-item {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      text-decoration:none; color:#94A3B8; font-size:12px; min-width:64px;
+    }
+    .social-item img {
+      width:40px; height:40px; border-radius:50%; object-fit:cover;
+      border:2px solid rgba(255,255,255,.2); background:#fff;
+    }
+    .social-item:hover { color:var(--accent); }
+    .social-item:hover img { border-color:var(--accent); }
+
+  </style>
     <h2 class="section-title"><span class="i18n-zh">热门产品</span><span class="i18n-en">Hot Products</span></h2>
     <p class="section-sub"><span class="i18n-zh">按分类筛选 · 支持多币种显示</span><span class="i18n-en">Filter by category · Multi-currency</span></p>
     <div class="products-layout">
       <aside class="sidebar-cat">
         <h4><span class="i18n-zh">分类</span><span class="i18n-en">Categories</span></h4>
         <div class="cat-list">
-          <a href="/" class="<%= (!catId || catId==='') ? 'active' : '' %>"><span class="i18n-zh">全部</span><span class="i18n-en">All</span></a>
+          <a href="/#products" class="cat-filter <%= (!catId || catId==='') ? 'active' : '' %>" data-cat=""><span class="i18n-zh">全部</span><span class="i18n-en">All</span></a>
           <% if (typeof categories !== 'undefined' && categories && categories.length) { %>
             <% categories.forEach(function(c){ %>
-              <a href="/?cat=<%= c.id %><%= keyword ? '&q='+encodeURIComponent(keyword) : '' %>"
-                 class="<%= String(catId) === String(c.id) ? 'active' : '' %>"
+              <a href="/?cat=<%= c.id %><%= keyword ? '&q='+encodeURIComponent(keyword) : '' %>#products"
+                 class="cat-filter <%= String(catId) === String(c.id) ? 'active' : '' %>"
+                 data-cat="<%= c.id %>"
                  data-bg="<%= c.bg_image || '' %>">
                 <span class="i18n-zh"><%= c.name_zh || c.name_en || ('分类'+c.id) %></span>
                 <span class="i18n-en"><%= c.name_en || c.name_zh || ('Cat '+c.id) %></span>
@@ -439,9 +515,33 @@
         <p>Email: <%= (config && config.email) || '' %><br>WhatsApp: <%= (config && config.wa) || '' %></p>
       </div>
     </div>
+    
+      <div class="social-bar" id="socialBar">
+        <% if (config && config.social1_img) { %>
+        <a class="social-item" href="<%= config.social1_url || '#' %>" target="_blank" rel="noopener">
+          <img src="<%= config.social1_img %>" alt="">
+          <% if (config.social1_text) { %><span><%= config.social1_text %></span><% } %>
+        </a>
+        <% } %>
+        <% if (config && config.social2_img) { %>
+        <a class="social-item" href="<%= config.social2_url || '#' %>" target="_blank" rel="noopener">
+          <img src="<%= config.social2_img %>" alt="">
+          <% if (config.social2_text) { %><span><%= config.social2_text %></span><% } %>
+        </a>
+        <% } %>
+        <% if (config && config.social3_img) { %>
+        <a class="social-item" href="<%= config.social3_url || '#' %>" target="_blank" rel="noopener">
+          <img src="<%= config.social3_img %>" alt="">
+          <% if (config.social3_text) { %><span><%= config.social3_text %></span><% } %>
+        </a>
+        <% } %>
+      </div>
+
     <div class="copyright"><%= (config && config.copyright_text) || '© 2026 AutoParts B2B. All rights reserved.' %></div>
   </footer>
 
+  
+  <button type="button" class="scroll-top" id="scrollTopBtn" title="回顶部">↑</button>
   <% if (config && config.wa) { %>
   <a href="https://wa.me/<%= String(config.wa).replace(/[^0-9]/g,'') %>" class="wa-float" target="_blank" rel="noopener">💬 WhatsApp</a>
   <% } %>
@@ -514,23 +614,96 @@
       if (slides.length > 1) setInterval(function(){ show((idx+1)%slides.length); }, delay);
     })();
 
-    // 分类底图（轻遮罩，不抢内容）
+    // 分类切换：AJAX 不整页刷新、不跳顶
     (function(){
       var sec = document.getElementById('products');
-      if (!sec) return;
+      var grid = document.querySelector('.product-grid');
+      if (!sec || !grid) return;
+
       function applyBg(url) {
-        if (!url) return;
+        if (!url) {
+          sec.classList.remove('has-cat-bg');
+          return;
+        }
         sec.style.setProperty('--cat-bg', 'url('+url+')');
         sec.classList.add('has-bg', 'has-cat-bg');
       }
-      document.querySelectorAll('.cat-list a[data-bg]').forEach(function(a){
-        a.addEventListener('click', function(){
-          var bg = this.getAttribute('data-bg');
-          if (bg) applyBg(bg);
+
+      function renderProducts(list) {
+        if (!list || !list.length) {
+          grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">暂无产品</div>';
+          return;
+        }
+        var lang = document.documentElement.getAttribute('lang') || 'zh-CN';
+        var isEn = lang === 'en';
+        grid.innerHTML = list.map(function(p){
+          var img = p.image || (p.images ? String(p.images).split(',')[0] : '') || 'https://via.placeholder.com/400x400?text=No+Image';
+          var name = isEn ? (p.name_en || p.name_zh || '') : (p.name_zh || p.name_en || '');
+          var price = Number(p.price || 0).toFixed(2);
+          return '<a href="/product/'+p.id+'" class="card">' +
+            '<div class="card-img"><img src="'+img+'" alt="" loading="lazy" onerror="this.src=\'https://via.placeholder.com/400x400?text=No+Image\'"></div>' +
+            '<div class="card-body"><h3>'+name+'</h3>' +
+            '<div class="card-meta">OE: '+(p.oe||'-')+' · '+(p.model||'')+'</div>' +
+            '<div class="price" data-hkd="'+(p.price||0)+'"><span class="cur-sym">HK$</span><span class="cur-val">'+price+'</span></div>' +
+            '</div></a>';
+        }).join('');
+        // 重新应用货币
+        var sel = document.getElementById('currencySelect');
+        if (sel) sel.dispatchEvent(new Event('change'));
+      }
+
+      document.querySelectorAll('.cat-filter').forEach(function(a){
+        a.addEventListener('click', function(e){
+          e.preventDefault();
+          var cat = this.getAttribute('data-cat') || '';
+          var bg = this.getAttribute('data-bg') || '';
+          document.querySelectorAll('.cat-filter').forEach(function(x){ x.classList.remove('active'); });
+          this.classList.add('active');
+          applyBg(bg);
+          // 保持当前滚动，不跳顶
+          var keepY = window.scrollY;
+          var q = new URLSearchParams(window.location.search);
+          var keyword = q.get('q') || '';
+          var sort = q.get('sort') || 'date';
+          var url = '/api/products?cat=' + encodeURIComponent(cat) + '&q=' + encodeURIComponent(keyword) + '&sort=' + encodeURIComponent(sort);
+          fetch(url).then(function(r){ return r.json(); }).then(function(j){
+            if (j.success) renderProducts(j.products);
+            // 更新地址栏但不跳转
+            var newUrl = cat ? ('/?cat=' + cat + (keyword ? '&q='+encodeURIComponent(keyword) : '') + '#products') : ('/' + (keyword ? '?q='+encodeURIComponent(keyword) : '') + '#products');
+            history.pushState(null, '', newUrl);
+            window.scrollTo(0, keepY);
+          }).catch(function(){
+            // 失败则正常跳转
+            window.location.href = this.href;
+          }.bind(this));
         });
       });
-      var active = document.querySelector('.cat-list a.active[data-bg]');
+
+      var active = document.querySelector('.cat-filter.active[data-bg]');
       if (active && active.getAttribute('data-bg')) applyBg(active.getAttribute('data-bg'));
+    })();
+
+    // 回顶按钮
+    (function(){
+      var btn = document.getElementById('scrollTopBtn');
+      if (!btn) return;
+      window.addEventListener('scroll', function(){
+        if (window.scrollY > 400) btn.classList.add('show');
+        else btn.classList.remove('show');
+      });
+      btn.addEventListener('click', function(){
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    })();
+
+    // 手机返回键
+    (function(){
+      var btn = document.getElementById('mobileBack');
+      if (!btn) return;
+      btn.addEventListener('click', function(){
+        if (window.history.length > 1) history.back();
+        else window.location.href = '/';
+      });
     })();
   </script>
 </body>
