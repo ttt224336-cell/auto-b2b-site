@@ -15,11 +15,19 @@
     body {
       min-height:100vh;
       background: linear-gradient(135deg, #0A2F5F 0%, #1E6BD9 100%);
+      background-size: cover;
+      background-position: center;
       display:flex;
       align-items:center;
       justify-content:center;
       padding:20px;
+      position: relative;
     }
+    body::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background: rgba(10,47,95,0.55);
+    }
+    .box { position:relative; z-index:1; }
     .box {
       background:#fff;
       width:100%;
@@ -194,7 +202,18 @@
     .btn-confirm { background:var(--main); color:#fff; }
   </style>
 </head>
-<body>
+<body
+  <% var _lb = (typeof config!=='undefined' && config && config.login_bg) ? config.login_bg : '';
+     var _lo = parseInt((typeof config!=='undefined' && config && config.login_bg_opacity) ? config.login_bg_opacity : '6', 10) || 6;
+     if (_lo < 1) _lo = 1; if (_lo > 10) _lo = 10;
+     var _imgOp = (_lo / 10).toFixed(2);
+     var _maskOp = (1 - _lo/10 * 0.75).toFixed(2);
+  %>
+  <% if (_lb) { %>
+  style="background-image: linear-gradient(rgba(10,47,95,<%= _maskOp %>), rgba(30,107,217,<%= _maskOp %>)), url('<%= _lb %>'); background-size:cover; background-position:center;"
+  <% } %>
+>
+
   <div class="box">
     <div class="logo">
       <h1>AUTO PARTS FACTORY</h1>
@@ -242,6 +261,10 @@
     <div class="modal">
       <h3>修改密码</h3>
       <form id="changePwdForm">
+        <label>登录账号</label>
+        <div class="input-wrap">
+          <input type="text" id="pwdUsername" placeholder="当前登录用户名" required value="admin">
+        </div>
         <label>当前密码</label>
         <div class="input-wrap">
           <input type="password" id="oldPwd" placeholder="输入当前密码" required>
@@ -334,10 +357,10 @@
       }
 
       // 发送到后端
-      fetch('/admin/change-password', {
+      fetch('/admin/change-password-public', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ oldPassword: oldPwd, newPassword: newPwd })
+        body: JSON.stringify({ username: document.getElementById('pwdUsername') ? document.getElementById('pwdUsername').value : 'admin', oldPassword: oldPwd, newPassword: newPwd })
       })
       .then(res => res.json())
       .then(data => {
