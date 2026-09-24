@@ -1,135 +1,473 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%=product.part_no%> | Auto Spare Parts Factory</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial, Helvetica, sans-serif;}
-        :root{
-            --main-dark:#0B2C58;
-            --accent-yellow:#F7D794;
-            --accent-blue:#22577A;
-            --light-bg:#f8f9fc;
-            --text-gray:#555;
-            --white:#ffffff;
-        }
-        body{background:var(--white);color:#333;line-height:1.7;}
-        .container{max-width:1240px;margin:0 auto;padding:0 20px;}
-        header{background:var(--main-dark);color:#fff;position:sticky;top:0;z-index:99;box-shadow:0 3px 10px rgba(0,0,0,0.12);}
-        .nav-wrap{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;}
-        .logo{font-size:22px;font-weight:bold;text-decoration:none;color:#fff;cursor:pointer;}
-        .header-right{display:flex;align-items:center;gap:24px;}
-        .lang-switch button{background:transparent;border:1px solid var(--accent-yellow);color:#fff;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:14px;}
-        nav ul{display:flex;gap:28px;list-style:none;}
-        nav a{color:#fff;text-decoration:none;font-size:15px;}
-        .mobile-menu{display:none;font-size:26px;}
-        .breadcrumb{padding:24px 0;background:var(--light-bg);font-size:14px;}
-        .breadcrumb a{color:var(--accent-blue);text-decoration:none;}
-        .product-detail-wrap{padding:70px 0;}
-        .detail-row{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:flex-start;}
-        .detail-img img{width:100%;border-radius:8px;object-fit:cover;}
-        .detail-info h1{font-size:30px;color:var(--main-dark);margin-bottom:14px;}
-        .oem-info{background:var(--light-bg);padding:14px;border-radius:6px;margin:18px 0;}
-        .spec-list{margin:24px 0;}
-        .spec-list li{list-style:none;padding:10px 0;border-bottom:1px solid #eee;}
-        .btn{display:inline-block;padding:15px 34px;background:linear-gradient(135deg,var(--accent-blue),var(--main-dark));color:#fff;text-decoration:none;border-radius:6px;font-size:16px;}
-        footer{background:var(--main-dark);color:#e2e6ee;padding:55px 0 30px;margin-top:60px;}
-        .foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:34px;margin-bottom:40px;}
-        .foot-col h4{color:var(--accent-yellow);margin-bottom:20px;font-size:18px;}
-        .foot-col p,.foot-col a{color:#cbd2e0;text-decoration:none;font-size:14px;line-height:1.9;}
-        .copyright{text-align:center;padding-top:24px;border-top:rgba(255,255,255,0.12) solid 1px;font-size:13px;color:#a2abc0;}
-        .float-whatsapp{position:fixed;bottom:26px;right:26px;z-index:98;}
-        .float-whatsapp a{display:flex;align-items:center;gap:9px;background:#25D366;color:#fff;padding:13px 20px;border-radius:50px;text-decoration:none;box-shadow:0 5px 14px rgba(0,0,0,0.22);font-weight:500;}
-        @media(max-width:768px){
-            .detail-row{grid-template-columns:1fr;gap:30px;}
-            nav ul{position:absolute;top:68px;left:0;width:100%;background:var(--main-dark);flex-direction:column;padding:24px;display:none;}
-            .mobile-menu{display:block;}
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= (typeof product !== 'undefined' && product) ? (product.name_zh || product.name_en || 'Product') : ((config && config.site_name) || 'AutoParts B2B') %> | Auto Parts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main: #0A2F5F; --blue: #1E6BD9; --accent: #F59E0B; --light: #F3F4F6;
+      --text: #1F2937; --muted: #6B7280; --white: #fff; --r: 12px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter', system-ui, sans-serif; }
+    body { background: #F8FAFC; color: var(--text); line-height:1.6; min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    img { max-width:100%; display:block; }
+
+    /* 整页背景 */
+    body.page-bg-full { background-size:cover; background-position:center; background-attachment:fixed; }
+    body.page-bg-full::before {
+      content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background: rgba(255,255,255, <%= (config && config.page_bg_opacity) ? config.page_bg_opacity : '0.88' %>);
+    }
+
+    /* Header */
+    .header {
+      position:sticky; top:0; z-index:100; background:var(--main); color:#fff;
+      box-shadow:0 2px 12px rgba(0,0,0,.15);
+    }
+    .header-inner {
+      max-width:1200px; margin:0 auto; padding:14px 20px;
+      display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    }
+    .logo { font-size:18px; font-weight:700; letter-spacing:-.02em; }
+    .nav { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+    .nav a { color:rgba(255,255,255,.9); font-size:14px; font-weight:500; }
+    .nav a:hover { color:var(--accent); }
+    .lang-cur { display:flex; align-items:center; gap:10px; }
+    .lang-cur button, .lang-cur select {
+      background:transparent; border:1px solid rgba(255,255,255,.35); color:#fff;
+      padding:5px 10px; border-radius:6px; font-size:12px; cursor:pointer;
+    }
+    .lang-cur button.active { background:var(--accent); border-color:var(--accent); color:#111; font-weight:600; }
+
+    /* Hero */
+    .hero {
+      padding:56px 20px; text-align:center;
+      background: linear-gradient(135deg, #E8F1FB 0%, #F0F7FF 100%);
+      <% if (config && config.hero_bg) { %>
+      background-image: linear-gradient(135deg, rgba(232,241,251,<%= config.hero_bg_opacity||0.55 %>), rgba(240,247,255,<%= config.hero_bg_opacity||0.55 %>)), url('<%= config.hero_bg %>');
+      background-size:cover; background-position:center;
+      <% } %>
+    }
+    .hero h1 { font-size:clamp(1.5rem,4vw,2.2rem); color:var(--main); margin-bottom:10px; font-weight:700; }
+    .hero p { color:var(--muted); max-width:640px; margin:0 auto 22px; font-size:15px; }
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      padding:11px 22px; border-radius:8px; font-size:14px; font-weight:600; border:none; cursor:pointer;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn:active { transform:scale(.97); }
+    .btn-main { background:linear-gradient(135deg,#1E6BD9,#0A2F5F); color:#fff; box-shadow:0 4px 14px rgba(30,107,217,.3); }
+    .btn-main:hover { box-shadow:0 6px 18px rgba(30,107,217,.4); }
+    .btn-accent { background:linear-gradient(135deg,#F59E0B,#E08A00); color:#fff; }
+    .btn-outline { background:#fff; color:var(--main); border:1.5px solid #C5D5EB; }
+
+    /* Factory */
+    .section { padding:48px 20px; }
+    .section-title { text-align:center; font-size:clamp(1.25rem,3vw,1.6rem); font-weight:700; color:var(--main); margin-bottom:6px; }
+    .section-sub { text-align:center; color:var(--muted); font-size:14px; margin-bottom:28px; }
+    .factory-grid {
+      max-width:1100px; margin:0 auto;
+      display:grid; grid-template-columns:1.1fr 1fr; gap:28px; align-items:center;
+    }
+    .factory-slider {
+      position:relative; border-radius:14px; overflow:hidden; aspect-ratio:16/10;
+      background:#E2EBF5; box-shadow:0 8px 28px rgba(10,47,95,.08);
+    }
+    .factory-slider .slide {
+      position:absolute; inset:0; opacity:0; background-size:cover; background-position:center;
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .factory-slider .slide.active { opacity:1; }
+    .factory-slider .slide.effect-slide { transform:translateX(24px); }
+    .factory-slider .slide.effect-slide.active { transform:translateX(0); }
+    .factory-slider .slide.effect-zoom { transform:scale(1.08); }
+    .factory-slider .slide.effect-zoom.active { transform:scale(1); }
+    .factory-slider .slide.effect-flip { transform:rotateY(70deg); }
+    .factory-slider .slide.effect-flip.active { transform:rotateY(0); }
+    .factory-slider .slide.effect-cube { transform:perspective(800px) rotateX(18deg) scale(.96); }
+    .factory-slider .slide.effect-cube.active { transform:perspective(800px) rotateX(0) scale(1); }
+    .slider-dots {
+      position:absolute; bottom:12px; left:0; right:0; display:flex; justify-content:center; gap:6px; z-index:2;
+    }
+    .slider-dots span {
+      width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.5); cursor:pointer;
+    }
+    .slider-dots span.active { background:#fff; transform:scale(1.25); }
+    .factory-info h3 { font-size:1.2rem; color:var(--main); margin-bottom:10px; }
+    .factory-info p { color:var(--muted); font-size:14px; margin-bottom:14px; }
+    .adv-list { list-style:none; }
+    .adv-list li { display:flex; gap:10px; align-items:flex-start; margin-bottom:8px; font-size:14px; }
+    .adv-list .icon {
+      width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#1E6BD9,#0A2F5F);
+      color:#fff; font-size:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+    }
+
+    /* Products */
+    .products-section {
+      padding:48px 16px 64px;
+      background: linear-gradient(180deg,#F7F9FC,#EEF3F9);
+      <% if (config && config.products_bg) { %>
+      background-image: linear-gradient(180deg, rgba(247,249,252,<%= config.products_bg_opacity||0.75 %>), rgba(238,243,249,<%= config.products_bg_opacity||0.8 %>)), url('<%= config.products_bg %>');
+      background-size:cover; background-position:center;
+      <% } %>
+      transition: background-image .45s ease;
+    }
+    .products-section.has-cat-bg {
+      background-image: linear-gradient(180deg, rgba(247,249,252,.72), rgba(238,243,249,.8)), var(--cat-bg) !important;
+      background-size:cover !important; background-position:center !important;
+    }
+    .products-layout {
+      max-width:1180px; margin:0 auto;
+      display:grid; grid-template-columns:200px 1fr; gap:20px; align-items:start;
+    }
+    .sidebar-cat {
+      position:sticky; top:74px; background:#fff; border-radius:var(--r); padding:16px;
+      box-shadow:0 2px 10px rgba(0,0,0,.04);
+    }
+    .sidebar-cat h4 { font-size:13px; color:var(--muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:.04em; }
+    .cat-list a {
+      display:block; padding:9px 12px; border-radius:8px; font-size:13px; color:var(--text);
+      margin-bottom:4px; transition:.15s;
+    }
+    .cat-list a:hover { background:#EBF2FB; color:var(--blue); }
+    .cat-list a.active { background:var(--blue); color:#fff; font-weight:600; }
+
+    .toolbar {
+      display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center;
+    }
+    .toolbar input, .toolbar select {
+      padding:9px 12px; border:1px solid #D1D5DB; border-radius:8px; font-size:13px; outline:none;
+    }
+    .toolbar input:focus { border-color:var(--blue); }
+    .product-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px;
+    }
+    .card {
+      background:#fff; border-radius:var(--r); overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.04);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.08); }
+    .card-img { aspect-ratio:1; background:#F1F5F9; overflow:hidden; }
+    .card-img img { width:100%; height:100%; object-fit:cover; }
+    .card-body { padding:14px; }
+    .card-body h3 { font-size:14px; font-weight:600; color:var(--main); margin-bottom:6px; line-height:1.35; }
+    .card-meta { font-size:12px; color:var(--muted); margin-bottom:8px; }
+    .price { font-size:16px; font-weight:700; color:var(--blue); }
+    .price .cur-sym { font-size:12px; margin-right:2px; }
+
+    /* Detail */
+    .detail-wrap { max-width:1000px; margin:0 auto; padding:32px 20px 60px; }
+    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; align-items:start; }
+    .detail-img { border-radius:var(--r); overflow:hidden; background:#F1F5F9; aspect-ratio:1; }
+    .detail-img img { width:100%; height:100%; object-fit:cover; }
+    .detail-info h1 { font-size:1.5rem; color:var(--main); margin-bottom:12px; }
+    .detail-info .meta { background:#F8FAFC; padding:12px 14px; border-radius:8px; margin:14px 0; font-size:14px; }
+    .detail-info .meta p { margin-bottom:4px; }
+    .spec-list { list-style:none; margin:16px 0; }
+    .spec-list li { padding:8px 0; border-bottom:1px solid #E5E7EB; font-size:14px; }
+
+    /* Footer */
+    footer { background:var(--main); color:#CBD5E1; padding:40px 20px 24px; margin-top:40px; }
+    .foot-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:28px; }
+    .foot-col h4 { color:var(--accent); margin-bottom:12px; font-size:15px; }
+    .foot-col p, .foot-col a { font-size:13px; line-height:1.8; color:#94A3B8; }
+    .copyright { text-align:center; margin-top:28px; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); font-size:12px; color:#64748B; }
+
+    .wa-float {
+      position:fixed; bottom:24px; right:24px; z-index:90;
+      background:#25D366; color:#fff; padding:12px 18px; border-radius:50px;
+      box-shadow:0 4px 16px rgba(37,211,102,.4); font-weight:600; font-size:14px;
+      display:flex; align-items:center; gap:8px;
+    }
+
+    .empty { text-align:center; padding:48px 20px; color:var(--muted); }
+
+    @media (max-width:900px) {
+      .factory-grid, .detail-grid, .products-layout { grid-template-columns:1fr !important; }
+      .sidebar-cat { position:static; display:flex; flex-wrap:wrap; gap:6px; }
+      .sidebar-cat h4 { width:100%; }
+      .cat-list { display:flex; flex-wrap:wrap; gap:6px; width:100%; }
+      .cat-list a { margin:0; }
+      .product-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }
+      .nav { gap:10px; }
+    }
+  </style>
 </head>
-<body>
-    <header>
-        <div class="container nav-wrap">
-            <a href="/" class="logo">AUTO PARTS FACTORY</a>
-            <div class="header-right">
-                <div class="lang-switch">
-                    <button id="btnEn">EN</button>
-                    <button id="btnCn">中文</button>
-                </div>
-                <nav>
-                    <div class="mobile-menu">☰</div>
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/#products">Products</a></li>
-                        <li><a href="/#inquiry">Inquiry</a></li>
-                    </ul>
-                </nav>
-            </div>
+<body class="<%= (config && config.page_bg_full==='1' && config.page_bg) ? 'page-bg-full' : '' %>"
+  <% if (config && config.page_bg_full==='1' && config.page_bg) { %>style="background-image:url('<%= config.page_bg %>')"<% } %>>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="/" class="logo"><%= (config && config.site_name) || 'AutoParts B2B' %></a>
+      <nav class="nav">
+        <a href="/">首页</a>
+        <a href="/#products">产品</a>
+        <a href="/#factory">工厂</a>
+        <a href="/#inquiry">询盘</a>
+        <div class="lang-cur">
+          <button type="button" data-lang="zh" class="active">中文</button>
+          <button type="button" data-lang="en">EN</button>
+          <select id="currencySelect">
+            <option value="HKD">HKD</option>
+            <option value="USD">USD</option>
+            <option value="CNY">CNY</option>
+            <option value="KRW">KRW</option>
+            <option value="JPY">JPY</option>
+          </select>
         </div>
-    </header>
-    <div class="breadcrumb">
-        <div class="container">
-            <a href="/">Home</a>
-            <span> / </span>
-            <a href="/#products">Products</a>
-            <span> / </span>
-            <span><%=product.part_no%></span>
-        </div>
+      </nav>
     </div>
-    <section class="product-detail-wrap">
-        <div class="container">
-            <div class="detail-row">
-                <div class="detail-img">
-                    <% if(product.img_url){ %>
-                        <img src="<%=product.img_url%>" alt="<%=product.part_no%>" onerror="this.src='https://via.placeholder.com/600x500?text=No+Image'">
-                    <% }else{ %>
-                        <img src="https://via.placeholder.com/600x500?text=No+Image" alt="no image">
-                    <% } %>
-                </div>
-                <div class="detail-info">
-                    <h1><%= product.part_no %></h1>
-                    <div class="oem-info">
-                        <p><strong>Spec：</strong><%= product.spec||'N/A' %></p>
-                        <p><strong>Category：</strong><%= product.category_name||'Uncategorized' %></p>
-                    </div>
-                    <ul class="spec-list">
-                        <li><strong>Price:</strong> $<%= product.price||"Inquiry" %></li>
-                        <li><strong>Service:</strong> OEM,ODM,Private label</li>
-                        <li><strong>MOQ:</strong> Negotiable, support trial order</li>
-                    </ul>
-                    <p style="margin-bottom:24px;">
-                        High quality auto spare parts, strictly quality‑inspected before shipment. Welcome send inquiry for best wholesale price.
-                    </p>
-                    <a href="/#inquiry" class="btn">Get Quotation</a>
-                </div>
-            </div>
-        </div>
-    </section>
-    <footer>
-        <div class="container">
-            <div class="foot-grid">
-                <div class="foot-col">
-                    <h4>Company Info</h4>
-                    <p>China professional auto spare parts manufacturer, focus on B2B wholesale & export.</p>
-                </div>
-                <div class="foot-col">
-                    <h4>Contact Information</h4>
-                    <p>Email: ttt224336@gmail.com<br>WhatsApp: +852 64960641</p>
-                </div>
-            </div>
-            <div class="copyright">© 2026 Auto Parts Factory. All Rights Reserved.</div>
-        </div>
-    </footer>
-    <div class="float-whatsapp">
-        <a target="_blank" href="https://wa.me/85264960641">💬 WhatsApp</a>
+  </header>
+
+  <% if (typeof page === 'undefined' || page === 'list') { %>
+  <!-- ========== 列表页 ========== -->
+  <section class="hero">
+    <h1><%= (config && config.company_name) || '汽配通 · 工业自动化配件' %></h1>
+    <p>一站式汽车零部件 B2B 采购平台 · OEM / ODM · 全球发货</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="#products" class="btn btn-main">浏览产品</a>
+      <a href="#inquiry" class="btn btn-accent">立即询盘</a>
     </div>
-<script>
-const body = document.body;
-const btnEn = document.getElementById('btnEn');
-const btnCn = document.getElementById('btnCn');
-btnEn.onclick = ()=> body.classList.remove('cn');
-btnCn.onclick = ()=> body.classList.add('cn');
-</script>
+  </section>
+
+  <!-- 工厂 -->
+  <section class="section" id="factory" style="background:#fff;">
+    <h2 class="section-title"><%= (factory && factory.title_zh) || '现代化生产基地' %></h2>
+    <p class="section-sub"><%= (factory && factory.title_en) || 'Modern Manufacturing Base' %></p>
+    <div class="factory-grid">
+      <div class="factory-slider" id="factorySlider">
+        <% 
+          var fImgs = [];
+          if (factory && factory.images) {
+            fImgs = String(factory.images).split(',').map(function(s){return s.trim();}).filter(Boolean);
+          }
+          if (!fImgs.length) fImgs = ['https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80'];
+          fImgs.forEach(function(src, i){ 
+        %>
+          <div class="slide <%= i===0?'active':'' %>" style="background-image:url('<%= src %>')"></div>
+        <% }); %>
+        <div class="slider-dots">
+          <% fImgs.forEach(function(_, i){ %><span data-index="<%= i %>" class="<%= i===0?'active':'' %>"></span><% }); %>
+        </div>
+      </div>
+      <div class="factory-info">
+        <h3><%= (factory && factory.title_zh) || '实力铸就品质' %></h3>
+        <p><%= (factory && factory.intro_zh) || '专业汽配制造，严格品控，服务全球客户。' %></p>
+        <ul class="adv-list">
+          <% 
+            var adv = (factory && factory.advantages_zh) ? String(factory.advantages_zh).split('|') : ['ISO认证','快速交期','OEM/ODM'];
+            adv.forEach(function(a){ if(a.trim()){ 
+          %>
+            <li><span class="icon">✓</span><span><%= a.trim() %></span></li>
+          <% }}); %>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 产品列表 -->
+  <section class="products-section" id="products">
+    <h2 class="section-title">热门产品</h2>
+    <p class="section-sub">按分类筛选 · 支持多币种显示</p>
+    <div class="products-layout">
+      <aside class="sidebar-cat">
+        <h4>分类</h4>
+        <div class="cat-list">
+          <a href="/" class="<%= (!catId || catId==='') ? 'active' : '' %>">全部</a>
+          <% if (typeof categories !== 'undefined' && categories && categories.length) { %>
+            <% categories.forEach(function(c){ %>
+              <a href="/?cat=<%= c.id %><%= keyword ? '&q='+encodeURIComponent(keyword) : '' %>"
+                 class="<%= String(catId) === String(c.id) ? 'active' : '' %>"
+                 data-bg="<%= c.bg_image || '' %>"><%= c.name_zh || c.name_en || ('分类'+c.id) %></a>
+            <% }); %>
+          <% } %>
+        </div>
+      </aside>
+      <div>
+        <form class="toolbar" method="get" action="/">
+          <% if (catId) { %><input type="hidden" name="cat" value="<%= catId %>"><% } %>
+          <input type="text" name="q" value="<%= keyword || '' %>" placeholder="搜索 OE / 名称 / 型号" style="flex:1;min-width:160px;">
+          <select name="sort">
+            <option value="date" <%= sort==='date'?'selected':'' %>>最新</option>
+            <option value="priceAsc" <%= sort==='priceAsc'?'selected':'' %>>价格↑</option>
+            <option value="priceDesc" <%= sort==='priceDesc'?'selected':'' %>>价格↓</option>
+          </select>
+          <button type="submit" class="btn btn-main">搜索</button>
+        </form>
+        <div class="product-grid">
+          <% if (typeof products !== 'undefined' && products && products.length) { %>
+            <% products.forEach(function(p){ 
+              var img = p.image || (p.images ? String(p.images).split(',')[0] : '') || 'https://via.placeholder.com/400x400?text=No+Image';
+            %>
+              <a href="/product/<%= p.id %>" class="card">
+                <div class="card-img"><img src="<%= img %>" alt="<%= p.name_zh || '' %>" loading="lazy" onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'"></div>
+                <div class="card-body">
+                  <h3><%= p.name_zh || p.name_en || '未命名产品' %></h3>
+                  <div class="card-meta">OE: <%= p.oe || '-' %> · <%= p.model || '' %></div>
+                  <div class="price" data-hkd="<%= p.price || 0 %>">
+                    <span class="cur-sym">HK$</span><span class="cur-val"><%= (p.price||0).toFixed(2) %></span>
+                  </div>
+                </div>
+              </a>
+            <% }); %>
+          <% } else { %>
+            <div class="empty" style="grid-column:1/-1;">暂无产品，请先在后台导入数据包或添加产品。</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 询盘区 -->
+  <section class="section" id="inquiry" style="background:#fff;">
+    <h2 class="section-title">联系我们 / 询盘</h2>
+    <p class="section-sub">WhatsApp: <%= (config && config.wa) || '+85264960641' %> · Email: <%= (config && config.email) || '' %></p>
+    <div style="max-width:480px;margin:0 auto;text-align:center;">
+      <a href="https://wa.me/<%= ((config && config.wa) || '85264960641').replace(/[^0-9]/g,'') %>" class="btn btn-main" target="_blank" rel="noopener">WhatsApp 询盘</a>
+    </div>
+  </section>
+
+  <% } else if (page === 'detail' && product) { %>
+  <!-- ========== 详情页 ========== -->
+  <div class="detail-wrap">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+      <a href="/">首页</a> / <a href="/#products">产品</a> / <%= product.name_zh || product.name_en || '' %>
+    </p>
+    <div class="detail-grid">
+      <div class="detail-img">
+        <% var dimg = product.image || (product.images ? String(product.images).split(',')[0] : '') || 'https://via.placeholder.com/600x600?text=No+Image'; %>
+        <img src="<%= dimg %>" alt="<%= product.name_zh || '' %>" onerror="this.src='https://via.placeholder.com/600x600?text=No+Image'">
+      </div>
+      <div class="detail-info">
+        <h1><%= product.name_zh || product.name_en || '产品详情' %></h1>
+        <% if (product.name_en && product.name_zh) { %><p style="color:var(--muted);font-size:14px;"><%= product.name_en %></p><% } %>
+        <div class="meta">
+          <p><strong>OE：</strong><%= product.oe || '-' %></p>
+          <p><strong>适用型号：</strong><%= product.model || '-' %></p>
+          <p><strong>库存：</strong><%= product.stock != null ? product.stock : '-' %></p>
+        </div>
+        <div class="price" data-hkd="<%= product.price || 0 %>" style="font-size:22px;margin:12px 0;">
+          <span class="cur-sym">HK$</span><span class="cur-val"><%= (product.price||0).toFixed(2) %></span>
+        </div>
+        <ul class="spec-list">
+          <li><strong>描述：</strong><%= product.description_zh || product.description_en || '高质量汽配，支持 OEM/ODM。' %></li>
+        </ul>
+        <a href="https://wa.me/<%= ((config && config.wa) || '85264960641').replace(/[^0-9]/g,'') %>?text=<%= encodeURIComponent('询盘: '+(product.name_zh||'')+' OE:'+(product.oe||'')) %>" class="btn btn-main" target="_blank" rel="noopener">WhatsApp 询价</a>
+        <a href="/" class="btn btn-outline" style="margin-left:8px;">返回列表</a>
+      </div>
+    </div>
+  </div>
+  <% } else { %>
+  <div class="empty" style="padding:80px 20px;">
+    <p>页面不存在或产品已下架</p>
+    <a href="/" class="btn btn-main" style="margin-top:16px;">返回首页</a>
+  </div>
+  <% } %>
+
+  <footer>
+    <div class="foot-inner">
+      <div class="foot-col">
+        <h4><%= (config && config.company_name) || '公司信息' %></h4>
+        <p><%= (config && config.address) || 'Hong Kong / Shenzhen' %></p>
+      </div>
+      <div class="foot-col">
+        <h4>联系方式</h4>
+        <p>Email: <%= (config && config.email) || '' %><br>WhatsApp: <%= (config && config.wa) || '' %></p>
+      </div>
+    </div>
+    <div class="copyright"><%= (config && config.copyright_text) || '© 2026 AutoParts B2B. All rights reserved.' %></div>
+  </footer>
+
+  <% if (config && config.wa) { %>
+  <a href="https://wa.me/<%= String(config.wa).replace(/[^0-9]/g,'') %>" class="wa-float" target="_blank" rel="noopener">💬 WhatsApp</a>
+  <% } %>
+
+  <script>
+    // 汇率（来自后台配置）
+    window.__RATES = {
+      HKD: 1,
+      USD: parseFloat('<%= (config && config.rate_usd) || "0.128" %>') || 0.128,
+      CNY: parseFloat('<%= (config && config.rate_cny) || "0.93" %>') || 0.93,
+      KRW: parseFloat('<%= (config && config.rate_krw) || "175" %>') || 175,
+      JPY: parseFloat('<%= (config && config.rate_jpy) || "19.5" %>') || 19.5
+    };
+    window.__SYMBOLS = { HKD:'HK$', USD:'US$', CNY:'¥', KRW:'₩', JPY:'¥' };
+
+    // 货币切换
+    (function(){
+      var sel = document.getElementById('currencySelect');
+      if (!sel) return;
+      var rates = window.__RATES, symbols = window.__SYMBOLS;
+      var saved = localStorage.getItem('currency') || 'HKD';
+      if (rates[saved]) sel.value = saved;
+      function format(n, cur) {
+        if (cur === 'KRW' || cur === 'JPY') return Math.round(n).toLocaleString();
+        return Number(n).toFixed(2);
+      }
+      function apply(cur) {
+        var rate = rates[cur] || 1, sym = symbols[cur] || cur;
+        document.querySelectorAll('.price[data-hkd]').forEach(function(el){
+          var hkd = parseFloat(el.getAttribute('data-hkd')) || 0;
+          var converted = hkd * rate;
+          var symEl = el.querySelector('.cur-sym'), valEl = el.querySelector('.cur-val');
+          if (symEl) symEl.textContent = sym;
+          if (valEl) valEl.textContent = format(converted, cur);
+        });
+        localStorage.setItem('currency', cur);
+      }
+      apply(sel.value);
+      sel.addEventListener('change', function(){ apply(sel.value); });
+    })();
+
+    // 工厂轮播 + 5种特效
+    (function(){
+      var slides = document.querySelectorAll('#factorySlider .slide');
+      var dots = document.querySelectorAll('.slider-dots span');
+      if (!slides.length) return;
+      var idx = 0;
+      var effectList = ['fade','slide','zoom','flip','cube'];
+      var currentEffect = '<%= (config && config.carousel_effect) || "fade" %>';
+      var randomMode = '<%= (config && config.carousel_random) || "0" %>' === '1';
+      var delay = <%= (config && config.carousel_delay) ? (parseInt(config.carousel_delay,10)||4000) : 4000 %>;
+      if (delay < 1500) delay = 4000;
+
+      function applyEffect(i) {
+        if (randomMode) currentEffect = effectList[Math.floor(Math.random()*effectList.length)];
+        slides.forEach(function(s, j){
+          s.className = 'slide effect-' + currentEffect + (j===i ? ' active' : '');
+        });
+        dots.forEach(function(d, j){ d.classList.toggle('active', j===i); });
+        idx = i;
+      }
+      applyEffect(0);
+      dots.forEach(function(d){
+        d.addEventListener('click', function(){ applyEffect(+d.getAttribute('data-index')); });
+      });
+      if (slides.length > 1) setInterval(function(){ applyEffect((idx+1) % slides.length); }, delay);
+    })();
+
+    // 分类底图切换
+    (function(){
+      var sec = document.getElementById('products');
+      if (!sec) return;
+      document.querySelectorAll('.cat-list a[data-bg]').forEach(function(a){
+        a.addEventListener('click', function(){
+          var bg = this.getAttribute('data-bg');
+          if (bg) {
+            sec.style.setProperty('--cat-bg', 'url(' + bg + ')');
+            sec.classList.add('has-cat-bg');
+          }
+        });
+      });
+      var active = document.querySelector('.cat-list a.active[data-bg]');
+      if (active && active.getAttribute('data-bg')) {
+        sec.style.setProperty('--cat-bg', 'url(' + active.getAttribute('data-bg') + ')');
+        sec.classList.add('has-cat-bg');
+      }
+    })();
+  </script>
 </body>
 </html>
