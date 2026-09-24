@@ -12,7 +12,7 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // 默认管理员 admin / 123456（首次运行会插入）
+  // 默认管理员 admin / 123456
   db.get('SELECT id FROM admins WHERE username = ?', ['admin'], (err, row) => {
     if (!row) {
       const bcrypt = require('bcryptjs');
@@ -21,7 +21,7 @@ db.serialize(() => {
     }
   });
 
-  // 分类
+  // 分类 - 新增 bg_image 底部背景图
   db.run(`CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name_zh TEXT NOT NULL,
@@ -29,8 +29,12 @@ db.serialize(() => {
     parent_id INTEGER DEFAULT 0,
     sort_order INTEGER DEFAULT 0,
     status INTEGER DEFAULT 1,
+    bg_image TEXT DEFAULT '',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // 尝试添加 bg_image 列（兼容旧库）
+  db.run(`ALTER TABLE categories ADD COLUMN bg_image TEXT DEFAULT ''`, () => {});
 
   // 产品
   db.run(`CREATE TABLE IF NOT EXISTS products (
@@ -99,6 +103,35 @@ db.serialize(() => {
     ip TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // 初始化默认配置
+  const defaults = {
+    site_name: 'AutoParts B2B',
+    company_name: '汽配通工业自动化',
+    contact_email: 'sales@example.com',
+    contact_whatsapp: '+85264960641',
+    copyright_text: '© 2026 AutoParts B2B. All rights reserved.',
+    address: 'Hong Kong',
+    hero_bg: '',
+    hero_bg_opacity: '0.35',
+    products_bg: '',
+    products_bg_opacity: '0.25',
+    factory_images: '',
+    carousel_delay: '4000',
+    carousel_effect: 'fade',
+    carousel_random: '0',
+    social1_img: '', social1_url: '',
+    social2_img: '', social2_url: '',
+    social3_img: '', social3_url: '',
+    rate_usd: '0.128', rate_cny: '0.93', rate_krw: '175', rate_jpy: '19.5',
+    rate_auto: '1',
+    page_bg: '',
+    page_bg_opacity: '0.15',
+    page_bg_full: '1'
+  };
+  const stmt = db.prepare('INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)');
+  Object.entries(defaults).forEach(([k, v]) => stmt.run(k, v));
+  stmt.finalize();
 });
 
 module.exports = db;
