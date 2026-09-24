@@ -76,6 +76,24 @@
           <div><label>联系邮箱</label><input name="contact_email" value="<%= config.contact_email||'' %>"></div>
           <div><label>WhatsApp</label><input name="contact_whatsapp" value="<%= config.contact_whatsapp||'' %>"></div>
           <div><label>地址</label><input name="address" value="<%= config.address||'' %>"></div>
+          <div><label>电话</label><input name="contact_phone" value="<%= config.contact_phone||'' %>" placeholder="+86 ..."></div>
+          <div><label>工作时间</label><input name="work_hours" value="<%= config.work_hours||'' %>" placeholder="Mon-Fri 9:00-18:00"></div>
+        </div>
+        <div class="grid" style="margin-top:12px;">
+          <div style="grid-column:1/-1;"><label>关于我们（中文）— 页脚显示</label><textarea name="about_zh" rows="3"><%= config.about_zh||'' %></textarea></div>
+          <div style="grid-column:1/-1;"><label>关于我们（英文）— Footer</label><textarea name="about_en" rows="3"><%= config.about_en||'' %></textarea></div>
+        </div>
+        <h3 style="margin:22px 0 12px;font-size:15px;color:#0A2F5F;">询盘区文案与背景</h3>
+        <div class="grid">
+          <div><label>询盘标题（中文）</label><input name="inquiry_title_zh" value="<%= config.inquiry_title_zh||'' %>" placeholder="联系我们 / 询盘"></div>
+          <div><label>询盘标题（英文）</label><input name="inquiry_title_en" value="<%= config.inquiry_title_en||'' %>" placeholder="Contact / Inquiry"></div>
+          <div style="grid-column:1/-1;"><label>询盘说明（中文）</label><input name="inquiry_desc_zh" value="<%= config.inquiry_desc_zh||'' %>"></div>
+          <div style="grid-column:1/-1;"><label>询盘说明（英文）</label><input name="inquiry_desc_en" value="<%= config.inquiry_desc_en||'' %>"></div>
+          <div style="grid-column:1/-1;">
+            <label>询盘区背景图（URL 或本地上传）</label>
+            <div class="file-row"><input type="text" name="inquiry_bg" value="<%= config.inquiry_bg||'' %>"><input type="file" name="inquiry_bg_file" accept="image/*"></div>
+          </div>
+
           <div><label>版权文字</label><input name="copyright_text" value="<%= config.copyright_text||'' %>"></div>
         </div>
       </div>
