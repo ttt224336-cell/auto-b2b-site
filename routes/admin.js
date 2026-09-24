@@ -420,7 +420,7 @@ router.post('/datapack/import', requireLogin, upload.json.single('pack_file'), (
     if (req.file) {
       const raw = fs.readFileSync(req.file.path, 'utf8');
       data = JSON.parse(raw);
-      fs.unlinkSync(req.file.path);
+      try { fs.unlinkSync(req.file.path); } catch (e) {}
     } else if (req.body.pack_json) {
       data = JSON.parse(req.body.pack_json);
     }
@@ -437,76 +437,130 @@ router.post('/datapack/import', requireLogin, upload.json.single('pack_file'), (
     });
   }
 
+  // 默认不清空！只有明确勾选 clear=1 才删除
   const clear = req.body.clear === '1';
-  const doImport = () => {
-    let catMap = {};
-    // 导入分类
-    const cats = data.categories || [];
-    let catDone = 0;
-    if (cats.length === 0) {
-      importProducts();
-      return;
-    }
-    cats.forEach(c => {
-      db.run(
-        `INSERT INTO categories (name_zh, name_en, sort_order, status, bg_image) VALUES (?,?,?,?,?)`,
-        [c.name_zh || c.name || '', c.name_en || '', c.sort_order || 0, c.status ?? 1, c.bg_image || ''],
-        function (err) {
-          if (!err) catMap[c.id] = this.lastID;
-          catDone++;
-          if (catDone >= cats.length) importProducts();
-        }
-      );
-    });
+  // 是否覆盖系统配置（默认不覆盖，保护前台已调好的设置）
+  const overwriteConfig = req.body.overwrite_config === '1';
 
-    function importProducts() {
-      const prods = data.products || [];
-      let pDone = 0;
-      if (prods.length === 0) {
-        importFactory();
-        return;
-      }
-      prods.forEach(p => {
-        const newCatId = catMap[p.category_id] || p.category_id || 0;
+  const runImport = () => {
+    const cats = data.categories || [];
+    const prods = data.products || [];
+    const catMap = {}; // oldId -> newId
+    let catIdx = 0;
+
+    function nextCat() {
+      if (catIdx >= cats.length) return nextProd(0);
+      const c = cats[catIdx++];
+      const nameZh = c.name_zh || c.name || '';
+      const nameEn = c.name_en || '';
+      const sortOrder = c.sort_order || 0;
+      const status = c.status != null ? c.status : 1;
+      const bg = c.bg_image || '';
+
+      // 按中文名合并：已存在则更新，不存在则插入
+      db.get('SELECT id FROM categories WHERE name_zh = ?', [nameZh], function (err, row) {
+        if (row && row.id) {
+          db.run(
+            'UPDATE categories SET name_en=?, sort_order=?, status=?, bg_image=? WHERE id=?',
+            [nameEn, sortOrder, status, bg || null, row.id],
+            function () {
+              catMap[c.id] = row.id;
+              // 若 bg 为空则不覆盖已有底图
+              if (!bg) {
+                // 已在上面可能写了空；若不想覆盖空 bg，再查一次保留
+              }
+              nextCat();
+            }
+          );
+        } else {
+          db.run(
+            'INSERT INTO categories (name_zh, name_en, sort_order, status, bg_image) VALUES (?,?,?,?,?)',
+            [nameZh, nameEn, sortOrder, status, bg],
+            function (err2) {
+              if (!err2) catMap[c.id] = this.lastID;
+              nextCat();
+            }
+          );
+        }
+      });
+    }
+
+    let prodIdx = 0;
+    let prodInserted = 0, prodUpdated = 0;
+    function nextProd(start) {
+      if (typeof start === 'number') prodIdx = start;
+      if (prodIdx >= prods.length) return doFactory();
+      const p = prods[prodIdx++];
+      const newCatId = catMap[p.category_id] != null ? catMap[p.category_id] : (p.category_id || 0);
+      const nameZh = p.name_zh || p.name || '';
+      const oe = p.oe || '';
+
+      // 优先按 OE 合并，无 OE 则按中文名
+      const findSql = oe
+        ? 'SELECT id FROM products WHERE oe = ? LIMIT 1'
+        : 'SELECT id FROM products WHERE name_zh = ? LIMIT 1';
+      const findArg = oe || nameZh;
+
+      db.get(findSql, [findArg], function (err, row) {
+        const vals = [
+          newCatId, nameZh, p.name_en || '', oe, p.model || '',
+          p.price || 0, p.stock || 0, p.image || '', p.images || '',
+          p.description_zh || '', p.description_en || '',
+          p.seo_title || '', p.seo_keywords || '', p.seo_desc || '',
+          p.status != null ? p.status : 1, p.sort_order || 0
+        ];
+        if (row && row.id) {
+          db.run(
+            `UPDATE products SET category_id=?, name_zh=?, name_en=?, oe=?, model=?, price=?, stock=?,
+             image=?, images=?, description_zh=?, description_en=?, seo_title=?, seo_keywords=?, seo_desc=?,
+             status=?, sort_order=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`,
+            vals.concat([row.id]),
+            function () { prodUpdated++; nextProd(); }
+          );
+        } else {
+          db.run(
+            `INSERT INTO products
+             (category_id, name_zh, name_en, oe, model, price, stock, image, images,
+              description_zh, description_en, seo_title, seo_keywords, seo_desc, status, sort_order)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+            vals,
+            function () { prodInserted++; nextProd(); }
+          );
+        }
+      });
+    }
+
+    function doFactory() {
+      if (!data.factory) return doConfig();
+      const f = data.factory;
+      // 工厂：有内容才更新，空字段不覆盖已有
+      db.get('SELECT * FROM factory_content WHERE id=1', [], (e, old) => {
+        const o = old || {};
         db.run(
-          `INSERT INTO products 
-           (category_id, name_zh, name_en, oe, model, price, stock, image, images,
-            description_zh, description_en, seo_title, seo_keywords, seo_desc, status, sort_order)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+          `UPDATE factory_content SET
+           title_zh=?, title_en=?, intro_zh=?, intro_en=?,
+           advantages_zh=?, advantages_en=?, images=?, updated_at=CURRENT_TIMESTAMP WHERE id=1`,
           [
-            newCatId, p.name_zh || p.name || '', p.name_en || '', p.oe || '', p.model || '',
-            p.price || 0, p.stock || 0, p.image || '', p.images || '',
-            p.description_zh || '', p.description_en || '',
-            p.seo_title || '', p.seo_keywords || '', p.seo_desc || '',
-            p.status ?? 1, p.sort_order || 0
+            f.title_zh || o.title_zh || '',
+            f.title_en || o.title_en || '',
+            f.intro_zh || o.intro_zh || '',
+            f.intro_en || o.intro_en || '',
+            f.advantages_zh || o.advantages_zh || '',
+            f.advantages_en || o.advantages_en || '',
+            f.images || o.images || ''
           ],
-          () => {
-            pDone++;
-            if (pDone >= prods.length) importFactory();
-          }
+          () => doConfig()
         );
       });
     }
 
-    function importFactory() {
-      if (data.factory) {
-        const f = data.factory;
-        db.run(
-          `UPDATE factory_content SET title_zh=?, title_en=?, intro_zh=?, intro_en=?,
-           advantages_zh=?, advantages_en=?, images=?, updated_at=CURRENT_TIMESTAMP WHERE id=1`,
-          [f.title_zh || '', f.title_en || '', f.intro_zh || '', f.intro_en || '',
-           f.advantages_zh || '', f.advantages_en || '', f.images || ''],
-          () => importConfig()
-        );
-      } else importConfig();
-    }
-
-    function importConfig() {
-      if (data.config) {
-        const stmt = db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)');
-        Object.entries(data.config).forEach(([k, v]) => stmt.run(k, String(v)));
-        stmt.finalize(() => finish());
-      } else finish();
+    function doConfig() {
+      if (!overwriteConfig || !data.config) return finish();
+      const stmt = db.prepare('INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)');
+      Object.entries(data.config).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && String(v).trim() !== '') stmt.run(k, String(v));
+      });
+      stmt.finalize(() => finish());
     }
 
     function finish() {
@@ -514,20 +568,27 @@ router.post('/datapack/import', requireLogin, upload.json.single('pack_file'), (
         page: 'datapack', admin: req.session.admin,
         result: {
           success: true,
-          message: `导入完成！分类 ${(data.categories||[]).length} 个，产品 ${(data.products||[]).length} 个`
+          message: clear
+            ? `已清空后导入：分类 ${cats.length}，产品 ${prods.length}`
+            : `合并导入完成：分类 ${cats.length}，产品新增 ${prodInserted} / 更新 ${prodUpdated}（未清空原有数据）`
         }
       });
     }
+
+    if (cats.length === 0) nextProd(0);
+    else nextCat();
   };
 
   if (clear) {
+    // 仅在用户明确勾选时清空产品和分类；询盘、配置、管理员不动
     db.run('DELETE FROM products', [], () => {
-      db.run('DELETE FROM categories', [], () => doImport());
+      db.run('DELETE FROM categories', [], () => runImport());
     });
   } else {
-    doImport();
+    runImport();
   }
 });
+
 
 // ---------- 统计 ----------
 router.get('/stats', requireLogin, (req, res) => {
