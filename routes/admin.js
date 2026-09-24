@@ -16,14 +16,25 @@ function requireLogin(req, res, next) {
 // ---------- 登录 ----------
 router.get('/login', (req, res) => {
   if (req.session && req.session.admin) return res.redirect('/admin/product');
-  res.render('admin/login', { error: null, success: null });
+  db.all('SELECT key, value FROM config', [], (err, rows) => {
+    const config = {};
+    (rows || []).forEach(r => { config[r.key] = r.value; });
+    res.render('admin/login', { error: null, success: null, config });
+  });
 });
 
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
+  const renderLogin = (error) => {
+    db.all('SELECT key, value FROM config', [], (e, rows) => {
+      const config = {};
+      (rows || []).forEach(r => { config[r.key] = r.value; });
+      res.render('admin/login', { error, success: null, config });
+    });
+  };
   db.get('SELECT * FROM admins WHERE username = ?', [username], (err, admin) => {
     if (err || !admin || !bcrypt.compareSync(password, admin.password)) {
-      return res.render('admin/login', { error: '用户名或密码错误', success: null });
+      return renderLogin('用户名或密码错误');
     }
     req.session.admin = { id: admin.id, username: admin.username, role: admin.role };
     res.redirect('/admin/product');
@@ -31,19 +42,51 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/change-password', requireLogin, (req, res) => {
-  const { oldPassword, newPassword } = req.body;
-  if (!oldPassword || !newPassword || newPassword.length < 6) {
+  const { oldPassword, newPassword, newUsername } = req.body || {};
+  if (!oldPassword || !newPassword || String(newPassword).length < 6) {
     return res.json({ success: false, message: '参数错误，新密码至少6位' });
   }
-  db.get('SELECT * FROM admins WHERE username = ?', ['admin'], (err, admin) => {
+  const currentUser = (req.session.admin && req.session.admin.username) || 'admin';
+  db.get('SELECT * FROM admins WHERE username = ?', [currentUser], (err, admin) => {
     if (err || !admin) return res.json({ success: false, message: '用户不存在' });
     if (!bcrypt.compareSync(oldPassword, admin.password)) {
       return res.json({ success: false, message: '当前密码错误' });
     }
-    const hash = bcrypt.hashSync(newPassword, 10);
-    db.run('UPDATE admins SET password = ? WHERE username = ?', [hash, 'admin'], (err2) => {
+    const hash = bcrypt.hashSync(String(newPassword), 10);
+    const uname = (newUsername && String(newUsername).trim()) ? String(newUsername).trim() : currentUser;
+    if (uname !== currentUser) {
+      db.get('SELECT id FROM admins WHERE username = ?', [uname], (e2, exists) => {
+        if (exists) return res.json({ success: false, message: '用户名已被占用' });
+        db.run('UPDATE admins SET username = ?, password = ? WHERE id = ?', [uname, hash, admin.id], (err3) => {
+          if (err3) return res.json({ success: false, message: '修改失败' });
+          req.session.admin.username = uname;
+          res.json({ success: true, message: '账号与密码已更新，请牢记新账号' });
+        });
+      });
+    } else {
+      db.run('UPDATE admins SET password = ? WHERE id = ?', [hash, admin.id], (err2) => {
+        if (err2) return res.json({ success: false, message: '修改失败' });
+        res.json({ success: true, message: '密码修改成功' });
+      });
+    }
+  });
+});
+
+// 登录页也可用：凭旧账号密码改密（未登录）
+router.post('/change-password-public', (req, res) => {
+  const { username, oldPassword, newPassword } = req.body || {};
+  if (!username || !oldPassword || !newPassword || String(newPassword).length < 6) {
+    return res.json({ success: false, message: '请填写完整，新密码至少6位' });
+  }
+  db.get('SELECT * FROM admins WHERE username = ?', [username], (err, admin) => {
+    if (err || !admin) return res.json({ success: false, message: '账号不存在' });
+    if (!bcrypt.compareSync(oldPassword, admin.password)) {
+      return res.json({ success: false, message: '原密码错误' });
+    }
+    const hash = bcrypt.hashSync(String(newPassword), 10);
+    db.run('UPDATE admins SET password = ? WHERE id = ?', [hash, admin.id], (err2) => {
       if (err2) return res.json({ success: false, message: '修改失败' });
-      res.json({ success: true, message: '密码修改成功' });
+      res.json({ success: true, message: '密码修改成功，请用新密码登录' });
     });
   });
 });
@@ -259,6 +302,7 @@ router.post('/settings', requireLogin, upload.fields([
   { name: 'products_bg_file', maxCount: 1 },
   { name: 'page_bg_file', maxCount: 1 },
   { name: 'inquiry_bg_file', maxCount: 1 },
+  { name: 'login_bg_file', maxCount: 1 },
   { name: 'social1_file', maxCount: 1 },
   { name: 'social2_file', maxCount: 1 },
   { name: 'social3_file', maxCount: 1 }
@@ -269,6 +313,7 @@ router.post('/settings', requireLogin, upload.fields([
     'inquiry_title_zh', 'inquiry_title_en', 'inquiry_desc_zh', 'inquiry_desc_en', 'inquiry_bg',
     'hero_bg', 'hero_bg_opacity', 'products_bg', 'products_bg_opacity',
     'page_bg', 'page_bg_opacity', 'page_bg_full',
+    'login_bg', 'login_bg_opacity',
     'factory_images', 'carousel_delay', 'carousel_effect', 'carousel_random',
     'social1_img', 'social1_url', 'social1_text', 'social2_img', 'social2_url', 'social2_text', 'social3_img', 'social3_url', 'social3_text',
     'rate_usd', 'rate_cny', 'rate_krw', 'rate_jpy', 'rate_auto'
@@ -279,6 +324,7 @@ router.post('/settings', requireLogin, upload.fields([
     if (req.files.products_bg_file) req.body.products_bg = '/uploads/' + req.files.products_bg_file[0].filename;
     if (req.files.page_bg_file) req.body.page_bg = '/uploads/' + req.files.page_bg_file[0].filename;
     if (req.files.inquiry_bg_file) req.body.inquiry_bg = '/uploads/' + req.files.inquiry_bg_file[0].filename;
+    if (req.files.login_bg_file) req.body.login_bg = '/uploads/' + req.files.login_bg_file[0].filename;
     if (req.files.social1_file) req.body.social1_img = '/uploads/' + req.files.social1_file[0].filename;
     if (req.files.social2_file) req.body.social2_img = '/uploads/' + req.files.social2_file[0].filename;
     if (req.files.social3_file) req.body.social3_img = '/uploads/' + req.files.social3_file[0].filename;
