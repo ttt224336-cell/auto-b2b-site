@@ -377,7 +377,7 @@ router.get('/datapack/export', requireLogin, (req, res) => {
   });
 });
 
-router.post('/datapack/analyze', requireLogin, upload.single('pack_file'), (req, res) => {
+router.post('/datapack/analyze', requireLogin, upload.json.single('pack_file'), (req, res) => {
   let data = null;
   try {
     if (req.file) {
@@ -414,7 +414,7 @@ router.post('/datapack/analyze', requireLogin, upload.single('pack_file'), (req,
   });
 });
 
-router.post('/datapack/import', requireLogin, upload.single('pack_file'), (req, res) => {
+router.post('/datapack/import', requireLogin, upload.json.single('pack_file'), (req, res) => {
   let data = null;
   try {
     if (req.file) {
