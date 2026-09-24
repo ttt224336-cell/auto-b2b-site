@@ -6,7 +6,6 @@ function getConfig(cb) {
   db.all('SELECT * FROM config', [], (e, rows) => {
     const config = {};
     (rows || []).forEach(row => config[row.key] = row.value);
-    // 兼容旧字段
     config.wa = config.contact_whatsapp || '+85264960641';
     config.email = config.contact_email || '';
     cb(config);
@@ -71,6 +70,16 @@ r.get('/product/:id', (req, res) => {
       });
     });
   });
+});
+
+// 前台询盘提交
+r.post('/inquiry', (req, res) => {
+  const { product_id, product_name, name, email, whatsapp, message } = req.body;
+  db.run(
+    `INSERT INTO inquiries (product_id, product_name, name, email, whatsapp, message) VALUES (?,?,?,?,?,?)`,
+    [product_id || null, product_name || '', name || '', email || '', whatsapp || '', message || ''],
+    () => res.json({ success: true, message: '询盘已提交，我们会尽快联系您' })
+  );
 });
 
 module.exports = r;
