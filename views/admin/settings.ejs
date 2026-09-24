@@ -110,13 +110,14 @@
             </div>
             <% if(config.hero_bg){ %><img src="<%= config.hero_bg %>" class="img-preview" alt=""><% } %>
             
-            <label>Hero 背景透明度 <span id="val_hero_bg_opacity" style="color:#1E6BD9;font-weight:600;"></span></label>
+            <label>Hero 背景强度 <span id="val_hero_bg_opacity" style="color:#1E6BD9;font-weight:700;"></span> / 10</label>
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-              <span style="font-size:11px;color:#6B7280;">透明</span>
-              <input type="range" name="hero_bg_opacity" id="rng_hero_bg_opacity" min="0" max="1" step="0.05" value="<%= config.hero_bg_opacity||'0.35' %>"
+              <span style="font-size:11px;color:#6B7280;white-space:nowrap;">弱 1</span>
+              <input type="range" name="hero_bg_opacity" id="rng_hero_bg_opacity" min="1" max="10" step="1" value="<%= config.hero_bg_opacity||'5' %>"
                 style="flex:1;accent-color:#1E6BD9;" oninput="document.getElementById('val_hero_bg_opacity').textContent=this.value">
-              <span style="font-size:11px;color:#6B7280;">不透明</span>
+              <span style="font-size:11px;color:#6B7280;white-space:nowrap;">强 10</span>
             </div>
+            <p style="font-size:11px;color:#9CA3AF;margin:-4px 0 12px;">数值越大，背景图越清晰明显</p>
             <script>document.getElementById('val_hero_bg_opacity').textContent=document.getElementById('rng_hero_bg_opacity').value;</script>
 " step="0.05" min="0" max="1">
           </div>
@@ -128,13 +129,14 @@
             </div>
             <% if(config.products_bg){ %><img src="<%= config.products_bg %>" class="img-preview" alt=""><% } %>
             
-            <label>产品区背景透明度 <span id="val_products_bg_opacity" style="color:#1E6BD9;font-weight:600;"></span></label>
+            <label>产品区背景强度 <span id="val_products_bg_opacity" style="color:#1E6BD9;font-weight:700;"></span> / 10</label>
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-              <span style="font-size:11px;color:#6B7280;">透明</span>
-              <input type="range" name="products_bg_opacity" id="rng_products_bg_opacity" min="0" max="1" step="0.05" value="<%= config.products_bg_opacity||'0.25' %>"
+              <span style="font-size:11px;color:#6B7280;white-space:nowrap;">弱 1</span>
+              <input type="range" name="products_bg_opacity" id="rng_products_bg_opacity" min="1" max="10" step="1" value="<%= config.products_bg_opacity||'4' %>"
                 style="flex:1;accent-color:#1E6BD9;" oninput="document.getElementById('val_products_bg_opacity').textContent=this.value">
-              <span style="font-size:11px;color:#6B7280;">不透明</span>
+              <span style="font-size:11px;color:#6B7280;white-space:nowrap;">强 10</span>
             </div>
+            <p style="font-size:11px;color:#9CA3AF;margin:-4px 0 12px;">数值越大，背景图越清晰明显</p>
             <script>document.getElementById('val_products_bg_opacity').textContent=document.getElementById('rng_products_bg_opacity').value;</script>
 " step="0.05" min="0" max="1">
           </div>
@@ -146,13 +148,14 @@
             </div>
             <% if(config.page_bg){ %><img src="<%= config.page_bg %>" class="img-preview" alt=""><% } %>
             
-            <label>整页背景透明度 <span id="val_page_bg_opacity" style="color:#1E6BD9;font-weight:600;"></span></label>
+            <label>整页背景强度 <span id="val_page_bg_opacity" style="color:#1E6BD9;font-weight:700;"></span> / 10</label>
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-              <span style="font-size:11px;color:#6B7280;">透明</span>
-              <input type="range" name="page_bg_opacity" id="rng_page_bg_opacity" min="0" max="1" step="0.05" value="<%= config.page_bg_opacity||'0.15' %>"
+              <span style="font-size:11px;color:#6B7280;white-space:nowrap;">弱 1</span>
+              <input type="range" name="page_bg_opacity" id="rng_page_bg_opacity" min="1" max="10" step="1" value="<%= config.page_bg_opacity||'3' %>"
                 style="flex:1;accent-color:#1E6BD9;" oninput="document.getElementById('val_page_bg_opacity').textContent=this.value">
-              <span style="font-size:11px;color:#6B7280;">不透明</span>
+              <span style="font-size:11px;color:#6B7280;white-space:nowrap;">强 10</span>
             </div>
+            <p style="font-size:11px;color:#9CA3AF;margin:-4px 0 12px;">数值越大，背景图越清晰明显</p>
             <script>document.getElementById('val_page_bg_opacity').textContent=document.getElementById('rng_page_bg_opacity').value;</script>
 " step="0.05" min="0" max="1">
             <label class="check-label" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
@@ -220,7 +223,59 @@
       </div>
 
       <div class="card">
-        <h3>社交图标（图片 + 链接）</h3>
+        <h3>
+        <h3 style="margin:28px 0 12px;font-size:15px;color:#0A2F5F;">🔐 后台账号安全</h3>
+        <div class="card" style="background:#F8FAFC;padding:18px;border-radius:10px;margin-bottom:18px;border:1px solid #E5E7EB;">
+          <p style="font-size:13px;color:#6B7280;margin-bottom:12px;">修改当前登录账号的用户名或密码（需验证原密码）</p>
+          <div class="grid">
+            <div><label>新用户名（可留空表示不改）</label><input type="text" id="accNewUser" placeholder="<%= admin.username %>"></div>
+            <div><label>原密码 *</label><input type="password" id="accOldPwd" placeholder="当前密码"></div>
+            <div><label>新密码 *（至少6位）</label><input type="password" id="accNewPwd"></div>
+            <div><label>确认新密码 *</label><input type="password" id="accNewPwd2"></div>
+          </div>
+          <button type="button" class="btn btn-amber" id="btnChangeAccount" style="margin-top:12px;">保存账号/密码</button>
+          <span id="accMsg" style="margin-left:12px;font-size:13px;"></span>
+        </div>
+        <script>
+        document.getElementById('btnChangeAccount').addEventListener('click', function(){
+          var oldP = document.getElementById('accOldPwd').value;
+          var newP = document.getElementById('accNewPwd').value;
+          var newP2 = document.getElementById('accNewPwd2').value;
+          var newU = document.getElementById('accNewUser').value.trim();
+          var msg = document.getElementById('accMsg');
+          if (!oldP || !newP) { msg.style.color='#EF4444'; msg.textContent='请填写原密码和新密码'; return; }
+          if (newP !== newP2) { msg.style.color='#EF4444'; msg.textContent='两次新密码不一致'; return; }
+          if (newP.length < 6) { msg.style.color='#EF4444'; msg.textContent='新密码至少6位'; return; }
+          fetch('/admin/change-password', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ oldPassword: oldP, newPassword: newP, newUsername: newU || undefined })
+          }).then(r=>r.json()).then(function(d){
+            msg.style.color = d.success ? '#10B981' : '#EF4444';
+            msg.textContent = d.message || '';
+            if (d.success) { document.getElementById('accOldPwd').value=''; document.getElementById('accNewPwd').value=''; document.getElementById('accNewPwd2').value=''; }
+          }).catch(function(){ msg.style.color='#EF4444'; msg.textContent='网络错误'; });
+        });
+        </script>
+
+        <h3 style="margin:22px 0 12px;font-size:15px;color:#0A2F5F;">🖼️ 后台登录页背景</h3>
+        <div class="grid">
+          <div style="grid-column:1/-1;">
+            <label>登录页背景图（URL 或本地上传）</label>
+            <div class="file-row"><input type="text" name="login_bg" value="<%= config.login_bg||'' %>" placeholder="https://... 或上传"><input type="file" name="login_bg_file" accept="image/*"></div>
+            <% if(config.login_bg){ %><img src="<%= config.login_bg %>" class="img-preview" alt="" style="max-height:80px;margin-top:8px;border-radius:8px;"><% } %>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label>登录页背景强度 <span id="val_login_bg_opacity" style="color:#1E6BD9;font-weight:700;"></span> / 10</label>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:11px;color:#6B7280;">弱 1</span>
+              <input type="range" name="login_bg_opacity" id="rng_login_bg_opacity" min="1" max="10" step="1" value="<%= config.login_bg_opacity||'6' %>" style="flex:1;accent-color:#1E6BD9;" oninput="document.getElementById('val_login_bg_opacity').textContent=this.value">
+              <span style="font-size:11px;color:#6B7280;">强 10</span>
+            </div>
+            <script>document.getElementById('val_login_bg_opacity').textContent=document.getElementById('rng_login_bg_opacity').value;</script>
+          </div>
+        </div>
+
+        社交图标（图片 + 链接）</h3>
         <div class="grid">
           <div>
             <label>图标1 图片</label>
