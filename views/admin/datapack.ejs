@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据包管理 — AutoParts B2B</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:12px;--green:#10B981;--red:#EF4444;}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+    body{background:var(--light);display:flex;min-height:100vh;color:#1F2937;}
+    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;z-index:50;}
+    .s-top{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .s-top h2{font-size:17px;font-weight:700;}
+    .s-top p{font-size:12px;opacity:.7;margin-top:4px;}
+    .s-menu{padding:16px 0;flex:1;overflow-y:auto;}
+    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;text-decoration:none;transition:.15s;}
+    .s-menu a:hover,.s-menu a.active{background:var(--blue);color:#fff;}
+    .s-bot{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
+    .s-bot a{color:#FCA5A5;font-size:13px;text-decoration:none;}
+    .main{flex:1;margin-left:220px;padding:24px;}
+    .top-bar{background:#fff;padding:16px 22px;border-radius:var(--r);margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 6px rgba(0,0,0,.04);flex-wrap:wrap;gap:12px;}
+    .top-bar h1{font-size:18px;font-weight:600;color:var(--main);}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;transition:.2s;}
+    .btn-blue{background:var(--blue);color:#fff;}
+    .btn-blue:hover{background:#1858b8;transform:translateY(-1px);}
+    .btn-green{background:var(--green);color:#fff;}
+    .btn-green:hover{background:#059669;}
+    .btn-amber{background:var(--accent);color:#111;}
+    .btn-outline{background:#fff;border:1px solid var(--gray);color:#374151;}
+    .card{background:#fff;border-radius:var(--r);padding:24px;margin-bottom:20px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .card h3{font-size:15px;font-weight:600;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--gray);color:var(--main);}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    @media(max-width:900px){.grid-2{grid-template-columns:1fr;}.main{margin-left:0;padding:16px;}.sidebar{display:none;}}
+    label{display:block;font-size:12px;font-weight:500;color:#4B5563;margin-bottom:6px;}
+    input[type=file],textarea,.input{width:100%;padding:10px 12px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;margin-bottom:12px;}
+    textarea{min-height:100px;resize:vertical;font-family:monospace;}
+    .alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:14px;}
+    .alert-error{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;}
+    .alert-success{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;}
+    .analysis-list{list-style:none;padding:0;}
+    .analysis-list li{padding:8px 0;border-bottom:1px dashed #E5E7EB;font-size:14px;}
+    .hint{font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:12px;}
+    .check-label{display:flex;align-items:center;gap:8px;font-size:13px;margin:12px 0;}
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="s-top"><h2>汽配B2B管理</h2><p>Admin Panel v2</p></div>
+    <nav class="s-menu">
+      <a href="/admin/product">📦 产品管理</a>
+      <a href="/admin/category">📁 分类管理</a>
+      <a href="/admin/factory">🏭 工厂展示</a>
+      <a href="/admin/inquiry">📩 询盘管理</a>
+      <a href="/admin/datapack" class="active">📥 数据包</a>
+      <a href="/admin/settings">⚙️ 系统设置</a>
+      <a href="/admin/stats">📈 数据统计</a>
+    </nav>
+    <div class="s-bot"><a href="/admin/logout">🚪 退出登录</a></div>
+  </div>
+  <div class="main">
+    <div class="top-bar">
+      <h1>📦 数据包管理 · 一键导入导出</h1>
+      <a href="/" target="_blank" class="btn btn-outline">🌐 查看前台</a>
+    </div>
+
+    <% if (result && result.error) { %><div class="alert alert-error"><%= result.error %></div><% } %>
+    <% if (result && result.success) { %><div class="alert alert-success"><%= result.message %></div><% } %>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>导出当前数据</h3>
+        <p class="hint">下载完整 JSON 数据包（分类 + 产品 + 工厂 + 配置），便于备份或迁移到其他站点。</p>
+        <a href="/admin/datapack/export" class="btn btn-blue">⬇️ 导出数据包</a>
+      </div>
+      <div class="card">
+        <h3>分析数据包</h3>
+        <form method="post" action="/admin/datapack/analyze" enctype="multipart/form-data">
+          <label>选择 JSON 文件</label>
+          <input type="file" name="pack_file" accept=".json,application/json">
+          <label>或粘贴 JSON 内容</label>
+          <textarea name="pack_json" placeholder='{"version":"2.0","categories":[...],...}'></textarea>
+          <button type="submit" class="btn btn-amber">🔍 分析数据包</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>一键导入数据包</h3>
+      <p class="hint">导入后将新增分类与产品。勾选「清空」会先删除现有分类和产品（不可恢复）。</p>
+      <form method="post" action="/admin/datapack/import" enctype="multipart/form-data">
+        <label>选择 JSON 文件</label>
+        <input type="file" name="pack_file" accept=".json,application/json">
+        <label>或粘贴 JSON 内容</label>
+        <textarea name="pack_json" rows="5"></textarea>
+        <label class="check-label"><input type="checkbox" name="clear" value="1"> 导入前清空现有分类与产品（慎用）</label>
+        <button type="submit" class="btn btn-green">🚀 一键导入数据包</button>
+      </form>
+    </div>
+
+    <% if (result && result.analysis) { %>
+    <div class="card">
+      <h3>📊 数据包分析结果</h3>
+      <ul class="analysis-list">
+        <li>版本：<%= result.analysis.version %></li>
+        <li>分类数量：<strong><%= result.analysis.categories %></strong></li>
+        <li>产品数量：<strong><%= result.analysis.products %></strong></li>
+        <li>包含工厂信息：<%= result.analysis.hasFactory ? '是' : '否' %></li>
+        <li>配置项数量：<%= result.analysis.configKeys %></li>
+        <li>示例分类：<%= (result.analysis.sampleCats||[]).join('、') || '-' %></li>
+        <li>示例产品：<%= (result.analysis.sampleProds||[]).join('、') || '-' %></li>
+      </ul>
+      <p class="hint">确认无误后使用上方「一键导入」完成导入。</p>
+    </div>
+    <% } %>
+
+    <div class="card">
+      <h3>示例数据包</h3>
+      <p class="hint">项目内置 <code>data/sample-datapack.json</code>，包含刹车系统、滤清器、点火、悬挂、电气等真实汽配示例（含参数、图片URL、中英文描述、工厂信息）。可直接上传导入体验完整前台效果。</p>
+    </div>
+  </div>
+</body>
+</html>
