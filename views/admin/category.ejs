@@ -3,124 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>分类管理 — AUTO PARTS FACTORY</title>
+  <title>分类管理 — AutoParts B2B</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:10px;}
+    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:12px;--green:#10B981;--red:#EF4444;}
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
     body{background:var(--light);display:flex;min-height:100vh;color:#1F2937;}
-    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;}
+    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;z-index:50;}
     .s-top{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
     .s-top h2{font-size:17px;font-weight:700;}
-    .s-top p{font-size:12px;opacity:.7;margin-top:4px;}
     .s-menu{padding:16px 0;flex:1;}
-    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;}
+    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;text-decoration:none;}
     .s-menu a:hover,.s-menu a.active{background:var(--blue);color:#fff;}
     .s-bot{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
-    .s-bot a{color:#FCA5A5;font-size:13px;}
+    .s-bot a{color:#FCA5A5;font-size:13px;text-decoration:none;}
     .main{flex:1;margin-left:220px;padding:24px;}
+    @media(max-width:900px){.main{margin-left:0;}.sidebar{display:none;}}
     .top-bar{background:#fff;padding:16px 22px;border-radius:var(--r);margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 6px rgba(0,0,0,.04);}
     .top-bar h1{font-size:18px;font-weight:600;color:var(--main);}
-    .btn{display:inline-block;padding:9px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;transition:.2s;}
     .btn-blue{background:var(--blue);color:#fff;}
-    .btn-green{background:#10B981;color:#fff;}
-    .btn-red{background:#EF4444;color:#fff;}
+    .btn-green{background:var(--green);color:#fff;}
+    .btn-red{background:var(--red);color:#fff;}
     .btn-sm{padding:5px 12px;font-size:12px;}
-    .card{background:#fff;border-radius:var(--r);padding:22px;margin-bottom:22px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
-    .card h3{font-size:15px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--gray);color:var(--main);}
+    .card{background:#fff;border-radius:var(--r);padding:22px;margin-bottom:20px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .card h3{font-size:15px;font-weight:600;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--gray);color:var(--main);}
     table{width:100%;border-collapse:collapse;font-size:13px;}
     th,td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--gray);}
     th{background:#F8FAFC;font-weight:600;color:#4B5563;}
-    input,select{width:100%;padding:9px 12px;border:1px solid #D1D5DB;border-radius:7px;font-size:13px;margin-bottom:12px;outline:none;}
-    label{display:block;font-size:12px;font-weight:500;color:#4B5563;margin-bottom:5px;}
-    .row{display:flex;gap:14px;flex-wrap:wrap;}
-    .col{flex:1;min-width:180px;}
-    .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;background:#E5E7EB;}
-    .tag.zero{background:#FEE2E2;color:#991B1B;}
+    input,select{padding:8px 12px;border:1px solid #D1D5DB;border-radius:7px;font-size:13px;}
+    label{display:block;font-size:12px;font-weight:500;color:#4B5563;margin-bottom:4px;}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+    .col{flex:1;min-width:140px;}
+    .hint{font-size:12px;color:#6B7280;margin-bottom:10px;}
+    .bg-thumb{width:60px;height:36px;object-fit:cover;border-radius:4px;border:1px solid #eee;}
   </style>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="s-top">
-      <h2>管理后台</h2>
-      <p>欢迎，<%= admin.username %></p>
-    </div>
+  <div class="sidebar">
+    <div class="s-top"><h2>汽配B2B管理</h2><p>Admin Panel v2</p></div>
     <nav class="s-menu">
       <a href="/admin/product">📦 产品管理</a>
       <a href="/admin/category" class="active">📁 分类管理</a>
       <a href="/admin/factory">🏭 工厂展示</a>
-      <a href="/admin/inquiry">💬 客户询盘</a>
-      <a href="/admin/stats">📊 数据统计</a>
+      <a href="/admin/inquiry">📩 询盘管理</a>
+      <a href="/admin/datapack">📥 数据包</a>
       <a href="/admin/settings">⚙️ 系统设置</a>
+      <a href="/admin/stats">📈 数据统计</a>
     </nav>
     <div class="s-bot"><a href="/admin/logout">🚪 退出登录</a></div>
-  </aside>
-
-  <main class="main">
+  </div>
+  <div class="main">
     <div class="top-bar">
       <h1>📁 分类管理</h1>
-      <a href="/" target="_blank" class="btn btn-blue">🌐 查看前台</a>
+      <a href="/" target="_blank" class="btn btn-blue">🌐 前台</a>
     </div>
-
     <div class="card">
-      <h3>➕ 添加分类</h3>
-      <form method="post" action="/admin/category/add">
+      <h3>添加分类</h3>
+      <p class="hint">可设置「底部背景图」：点击该分类时前台产品区底部自动切换对应底图。支持 URL 或本地上传。</p>
+      <form method="post" action="/admin/category/add" enctype="multipart/form-data">
         <div class="row">
-          <div class="col">
-            <label>分类名称（中文）*</label>
-            <input type="text" name="name_zh" required>
-          </div>
-          <div class="col">
-            <label>分类名称（英文）</label>
-            <input type="text" name="name_en">
-          </div>
-          <div class="col">
-            <label>排序号</label>
-            <input type="number" name="sort_order" value="0">
-          </div>
+          <div class="col"><label>中文名称 *</label><input type="text" name="name_zh" required></div>
+          <div class="col"><label>英文名称</label><input type="text" name="name_en" placeholder="English name"></div>
+          <div class="col"><label>排序</label><input type="number" name="sort_order" value="0"></div>
+          <div class="col"><label>底部背景图 URL</label><input type="text" name="bg_image" placeholder="https://..."></div>
+          <div class="col"><label>或本地上传</label><input type="file" name="bg_file" accept="image/*"></div>
+          <div><button type="submit" class="btn btn-green">➕ 添加</button></div>
         </div>
-        <button type="submit" class="btn btn-green">✅ 添加分类</button>
       </form>
     </div>
-
     <div class="card">
       <h3>分类列表</h3>
       <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>名称（中）</th>
-            <th>名称（英）</th>
-            <th>产品数</th>
-            <th>排序</th>
-            <th>操作</th>
-          </tr>
-        </thead>
+        <thead><tr><th>ID</th><th>中文</th><th>英文</th><th>排序</th><th>产品数</th><th>底部底图</th><th>操作</th></tr></thead>
         <tbody>
-          <% if(!categoryList || categoryList.length === 0){ %>
-            <tr><td colspan="6" style="text-align:center;color:#9CA3AF;padding:40px;">暂无分类，请先添加</td></tr>
-          <% } %>
-          <% (categoryList || []).forEach(c => { %>
-            <tr>
-              <td><%= c.id %></td>
-              <td><%= c.name_zh %></td>
-              <td><%= c.name_en || '-' %></td>
-              <td><span class="tag <%= c.count===0?'zero':'' %>"><%= c.count || 0 %></span></td>
-              <td><%= c.sort_order %></td>
-              <td>
-                <form method="post" action="/admin/category/edit/<%= c.id %>" style="display:inline-flex;gap:6px;align-items:center;">
-                  <input type="text" name="name_zh" value="<%= c.name_zh %>" style="width:120px;margin:0;padding:5px 8px;">
-                  <input type="text" name="name_en" value="<%= c.name_en||'' %>" style="width:100px;margin:0;padding:5px 8px;" placeholder="英文">
-                  <input type="number" name="sort_order" value="<%= c.sort_order %>" style="width:60px;margin:0;padding:5px 8px;">
-                  <button type="submit" class="btn btn-sm btn-blue">保存</button>
-                </form>
-                <a href="/admin/category/del/<%= c.id %>" class="btn btn-sm btn-red" onclick="return confirm('确定删除此分类？')">删除</a>
-              </td>
-            </tr>
+          <% (categoryList||[]).forEach(function(c){ %>
+          <tr>
+            <td><%= c.id %></td>
+            <td><%= c.name_zh %></td>
+            <td><%= c.name_en||'-' %></td>
+            <td><%= c.sort_order %></td>
+            <td><%= c.count||0 %></td>
+            <td><% if(c.bg_image){ %><img src="<%= c.bg_image %>" class="bg-thumb" alt=""><% } else { %>-<% } %></td>
+            <td>
+              <form method="post" action="/admin/category/edit/<%= c.id %>" enctype="multipart/form-data" style="display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center;">
+                <input type="text" name="name_zh" value="<%= c.name_zh %>" style="width:100px;">
+                <input type="text" name="name_en" value="<%= c.name_en||'' %>" style="width:100px;" placeholder="EN">
+                <input type="number" name="sort_order" value="<%= c.sort_order %>" style="width:60px;">
+                <input type="text" name="bg_image" value="<%= c.bg_image||'' %>" style="width:140px;" placeholder="底图URL">
+                <input type="file" name="bg_file" accept="image/*" style="width:120px;">
+                <button type="submit" class="btn btn-blue btn-sm">保存</button>
+              </form>
+              <a href="/admin/category/del/<%= c.id %>" class="btn btn-red btn-sm" onclick="return confirm('确定删除？')">删除</a>
+            </td>
+          </tr>
           <% }) %>
         </tbody>
       </table>
     </div>
-  </main>
+  </div>
 </body>
 </html>
