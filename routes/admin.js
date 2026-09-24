@@ -267,7 +267,7 @@ router.post('/settings', requireLogin, upload.fields([
     'hero_bg', 'hero_bg_opacity', 'products_bg', 'products_bg_opacity',
     'page_bg', 'page_bg_opacity', 'page_bg_full',
     'factory_images', 'carousel_delay', 'carousel_effect', 'carousel_random',
-    'social1_img', 'social1_url', 'social2_img', 'social2_url', 'social3_img', 'social3_url',
+    'social1_img', 'social1_url', 'social1_text', 'social2_img', 'social2_url', 'social2_text', 'social3_img', 'social3_url', 'social3_text',
     'rate_usd', 'rate_cny', 'rate_krw', 'rate_jpy', 'rate_auto'
   ];
   // 覆盖上传文件
@@ -534,14 +534,64 @@ router.get('/stats', requireLogin, (req, res) => {
   db.get('SELECT COUNT(*) as total FROM products', [], (e, p) => {
     db.get('SELECT COUNT(*) as total FROM categories', [], (e2, c) => {
       db.get('SELECT COUNT(*) as total FROM inquiries WHERE status="pending"', [], (e3, i) => {
-        res.render('admin/stats', {
-          page: 'stats', admin: req.session.admin,
-          totalProduct: p ? p.total : 0,
-          totalCategory: c ? c.total : 0,
-          pendingInquiry: i ? i.total : 0
+        db.get('SELECT COUNT(*) as total FROM inquiries', [], (e4, it) => {
+          db.all(`SELECT c.name_zh as name, COUNT(p.id) as cnt
+                  FROM categories c LEFT JOIN products p ON p.category_id=c.id
+                  GROUP BY c.id ORDER BY cnt DESC`, [], (e5, byCat) => {
+            db.all(`SELECT status, COUNT(*) as cnt FROM products GROUP BY status`, [], (e6, byStatus) => {
+              db.all(`SELECT date(created_at) as d, COUNT(*) as cnt FROM products
+                      GROUP BY date(created_at) ORDER BY d DESC LIMIT 14`, [], (e7, byDay) => {
+                res.render('admin/stats', {
+                  page: 'stats', admin: req.session.admin,
+                  totalProduct: p ? p.total : 0,
+                  totalCategory: c ? c.total : 0,
+                  pendingInquiry: i ? i.total : 0,
+                  totalInquiry: it ? it.total : 0,
+                  byCategory: byCat || [],
+                  byStatus: byStatus || [],
+                  byDay: (byDay || []).reverse()
+                });
+              });
+            });
+          });
         });
       });
     });
+  });
+});
+
+// 导出产品 CSV
+router.get('/export/products', requireLogin, (req, res) => {
+  db.all(`SELECT p.id, p.name_zh, p.name_en, p.oe, p.model, p.price, p.stock, p.status,
+                 c.name_zh as category, p.created_at
+          FROM products p LEFT JOIN categories c ON p.category_id=c.id
+          ORDER BY c.sort_order, p.id`, [], (err, rows) => {
+    const header = 'ID,分类,中文名,英文名,OE,型号,价格,库存,状态,创建时间\n';
+    const lines = (rows || []).map(r =>
+      [r.id, r.category||'', r.name_zh||'', r.name_en||'', r.oe||'', r.model||'',
+       r.price||0, r.stock||0, r.status==1?'上架':'下架', r.created_at||'']
+        .map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')
+    );
+    const bom = '\uFEFF';
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=products-export.csv');
+    res.send(bom + header + lines.join('\n'));
+  });
+});
+
+// 导出询盘 CSV
+router.get('/export/inquiries', requireLogin, (req, res) => {
+  db.all('SELECT * FROM inquiries ORDER BY id DESC', [], (err, rows) => {
+    const header = 'ID,产品ID,产品名,姓名,邮箱,WhatsApp,留言,状态,回复,创建时间\n';
+    const lines = (rows || []).map(r =>
+      [r.id, r.product_id||'', r.product_name||'', r.name||'', r.email||'', r.whatsapp||'',
+       r.message||'', r.status||'', r.reply||'', r.created_at||'']
+        .map(v => '"' + String(v).replace(/"/g,'""') + '"').join(',')
+    );
+    const bom = '\uFEFF';
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename=inquiries-export.csv');
+    res.send(bom + header + lines.join('\n'));
   });
 });
 
