@@ -1,9 +1,12 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const db = new sqlite3.Database(path.join(__dirname, 'auto_parts.db'));
+const fs = require('fs');
+
+// 数据库文件固定在项目根目录，升级代码不会删除此文件
+const dbPath = path.join(__dirname, 'auto_parts.db');
+const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
-  // 管理员
   db.run(`CREATE TABLE IF NOT EXISTS admins (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
@@ -12,7 +15,7 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // 默认管理员 admin / 123456
+  // 仅当没有任何管理员时才插入默认账号，不覆盖已有密码
   db.get('SELECT id FROM admins WHERE username = ?', ['admin'], (err, row) => {
     if (!row) {
       const bcrypt = require('bcryptjs');
@@ -21,7 +24,6 @@ db.serialize(() => {
     }
   });
 
-  // 分类 - 新增 bg_image 底部背景图
   db.run(`CREATE TABLE IF NOT EXISTS categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name_zh TEXT NOT NULL,
@@ -32,11 +34,9 @@ db.serialize(() => {
     bg_image TEXT DEFAULT '',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
-
-  // 尝试添加 bg_image 列（兼容旧库）
+  // 兼容旧库：缺列才加，不删数据
   db.run(`ALTER TABLE categories ADD COLUMN bg_image TEXT DEFAULT ''`, () => {});
 
-  // 产品
   db.run(`CREATE TABLE IF NOT EXISTS products (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     category_id INTEGER DEFAULT 0,
@@ -59,13 +59,11 @@ db.serialize(() => {
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // 系统配置
   db.run(`CREATE TABLE IF NOT EXISTS config (
     key TEXT PRIMARY KEY,
     value TEXT
   )`);
 
-  // 工厂展示内容
   db.run(`CREATE TABLE IF NOT EXISTS factory_content (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     title_zh TEXT DEFAULT '现代化生产基地 · 实力铸就品质',
@@ -79,7 +77,6 @@ db.serialize(() => {
   )`);
   db.run(`INSERT OR IGNORE INTO factory_content (id) VALUES (1)`);
 
-  // 客户询盘
   db.run(`CREATE TABLE IF NOT EXISTS inquiries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     product_id INTEGER,
@@ -94,7 +91,6 @@ db.serialize(() => {
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // 操作日志
   db.run(`CREATE TABLE IF NOT EXISTS logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     admin_id INTEGER,
@@ -104,7 +100,7 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  // 初始化默认配置
+  // 仅插入缺失的默认配置键，绝不覆盖用户已保存的值
   const defaults = {
     site_name: 'AutoParts B2B',
     company_name: '汽配通工业自动化',
@@ -120,14 +116,14 @@ db.serialize(() => {
     carousel_delay: '4000',
     carousel_effect: 'fade',
     carousel_random: '0',
-    social1_img: '', social1_url: '',
-    social2_img: '', social2_url: '',
-    social3_img: '', social3_url: '',
+    social1_img: '', social1_url: '', social1_text: '',
+    social2_img: '', social2_url: '', social2_text: '',
+    social3_img: '', social3_url: '', social3_text: '',
     rate_usd: '0.128', rate_cny: '0.93', rate_krw: '175', rate_jpy: '19.5',
     rate_auto: '1',
     page_bg: '',
     page_bg_opacity: '0.15',
-    page_bg_full: '1'
+    page_bg_full: '0'
   };
   const stmt = db.prepare('INSERT OR IGNORE INTO config (key, value) VALUES (?, ?)');
   Object.entries(defaults).forEach(([k, v]) => stmt.run(k, v));
