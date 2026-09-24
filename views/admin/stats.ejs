@@ -3,73 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>数据统计 — AUTO PARTS FACTORY</title>
+  <title>数据统计 — AutoParts B2B</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:10px;}
+    :root{--main:#0A2F5F;--blue:#1E6BD9;--accent:#F59E0B;--light:#F3F4F6;--gray:#E5E7EB;--r:12px;--green:#10B981;}
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
     body{background:var(--light);display:flex;min-height:100vh;color:#1F2937;}
-    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;}
+    .sidebar{width:220px;background:var(--main);color:#fff;position:fixed;top:0;bottom:0;left:0;display:flex;flex-direction:column;z-index:50;}
     .s-top{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.1);}
     .s-top h2{font-size:17px;font-weight:700;}
     .s-top p{font-size:12px;opacity:.7;margin-top:4px;}
-    .s-menu{padding:16px 0;flex:1;}
-    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;}
+    .s-menu{padding:16px 0;flex:1;overflow-y:auto;}
+    .s-menu a{display:block;padding:11px 20px;margin:3px 10px;border-radius:8px;color:rgba(255,255,255,.85);font-size:14px;text-decoration:none;}
     .s-menu a:hover,.s-menu a.active{background:var(--blue);color:#fff;}
     .s-bot{padding:16px;border-top:1px solid rgba(255,255,255,.1);}
-    .s-bot a{color:#FCA5A5;font-size:13px;}
+    .s-bot a{color:#FCA5A5;font-size:13px;text-decoration:none;}
     .main{flex:1;margin-left:220px;padding:24px;}
-    .top-bar{background:#fff;padding:16px 22px;border-radius:var(--r);margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    @media(max-width:900px){.main{margin-left:0;}.sidebar{display:none;}}
+    .top-bar{background:#fff;padding:16px 22px;border-radius:var(--r);margin-bottom:22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 6px rgba(0,0,0,.04);flex-wrap:wrap;gap:12px;}
     .top-bar h1{font-size:18px;font-weight:600;color:var(--main);}
-    .btn{display:inline-block;padding:9px 18px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;}
-    .btn-blue{background:var(--blue);color:#fff;}
-    .card{background:#fff;border-radius:var(--r);padding:22px;margin-bottom:22px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
-    .card h3{font-size:15px;font-weight:600;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--gray);color:var(--main);}
-    .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;}
-    .stat-card{background:linear-gradient(135deg,var(--main),var(--blue));color:#fff;padding:24px;border-radius:var(--r);text-align:center;}
-    .stat-num{font-size:32px;font-weight:700;}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;text-decoration:none;color:#fff;}
+    .btn-blue{background:var(--blue);}
+    .btn-green{background:var(--green);}
+    .btn-amber{background:var(--accent);color:#111;}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:22px;}
+    .stat-card{background:linear-gradient(135deg,#1E6BD9,#0A2F5F);color:#fff;border-radius:var(--r);padding:22px;text-align:center;}
+    .stat-card .num{font-size:32px;font-weight:700;}
+    .stat-card .label{font-size:13px;opacity:.9;margin-top:4px;}
+    .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:22px;}
+    @media(max-width:800px){.chart-row{grid-template-columns:1fr;}}
+    .card{background:#fff;border-radius:var(--r);padding:22px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+    .card h3{font-size:15px;font-weight:600;margin-bottom:16px;color:var(--main);}
+    canvas{max-width:100%;}
+    .export-bar{display:flex;gap:10px;flex-wrap:wrap;}
   </style>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="s-top">
-      <h2>管理后台</h2>
-      <p>欢迎，<%= admin.username %></p>
-    </div>
+  <div class="sidebar">
+    <div class="s-top"><h2>管理后台</h2><p>欢迎，<%= admin.username %></p></div>
     <nav class="s-menu">
       <a href="/admin/product">📦 产品管理</a>
       <a href="/admin/category">📁 分类管理</a>
       <a href="/admin/factory">🏭 工厂展示</a>
-      <a href="/admin/inquiry">💬 客户询盘</a>
+      <a href="/admin/inquiry">📩 客户询盘</a>
+      <a href="/admin/datapack">📥 数据包</a>
       <a href="/admin/stats" class="active">📊 数据统计</a>
       <a href="/admin/settings">⚙️ 系统设置</a>
     </nav>
-    <div class="s-bot"><a href="/admin/logout">🚪 退出登录</a></div>
-  </aside>
-
-  <main class="main">
+    <div class="s-bot"><a href="/admin/logout">退出登录</a></div>
+  </div>
+  <div class="main">
     <div class="top-bar">
       <h1>📊 数据统计</h1>
-      <a href="/" target="_blank" class="btn btn-blue">🌐 查看前台</a>
+      <div class="export-bar">
+        <a href="/admin/export/products" class="btn btn-green">⬇️ 下载产品表格</a>
+        <a href="/admin/export/inquiries" class="btn btn-amber">⬇️ 下载询盘表格</a>
+        <a href="/" target="_blank" class="btn btn-blue">查看前台</a>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="stat-card"><div class="num"><%= totalCategory %></div><div class="label">分类总数</div></div>
+      <div class="stat-card"><div class="num"><%= totalProduct %></div><div class="label">产品总数</div></div>
+      <div class="stat-card"><div class="num"><%= pendingInquiry %></div><div class="label">待处理询盘</div></div>
+      <div class="stat-card"><div class="num"><%= typeof totalInquiry!=='undefined'?totalInquiry:0 %></div><div class="label">询盘总计</div></div>
+    </div>
+
+    <div class="chart-row">
+      <div class="card">
+        <h3>📈 产品按分类分布（线性）</h3>
+        <canvas id="lineChart" height="220"></canvas>
+      </div>
+      <div class="card">
+        <h3>🍩 产品按分类占比（圆形）</h3>
+        <canvas id="pieChart" height="220"></canvas>
+      </div>
     </div>
 
     <div class="card">
-      <h3>整体概览</h3>
-      <div class="stat-row">
-        <div class="stat-card">
-          <div class="stat-num"><%= totalCategory || 0 %></div>
-          <div>分类总数</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num"><%= totalProduct || 0 %></div>
-          <div>产品总数</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-num"><%= pendingInquiry || 0 %></div>
-          <div>待处理询盘</div>
-        </div>
-      </div>
+      <h3>📅 近两周产品新增趋势</h3>
+      <canvas id="trendChart" height="120"></canvas>
     </div>
-  </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    var byCat = <%- JSON.stringify(typeof byCategory!=='undefined'?byCategory:[]) %>;
+    var byDay = <%- JSON.stringify(typeof byDay!=='undefined'?byDay:[]) %>;
+    var labels = byCat.map(function(x){ return x.name || '未分类'; });
+    var data = byCat.map(function(x){ return x.cnt || 0; });
+    var colors = ['#1E6BD9','#0A2F5F','#F59E0B','#10B981','#8B5CF6','#EF4444','#06B6D4','#EC4899'];
+
+    new Chart(document.getElementById('lineChart'), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{ label: '产品数', data: data, backgroundColor: colors, borderRadius: 6 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+
+    new Chart(document.getElementById('pieChart'), {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{ data: data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+
+    var dayLabels = byDay.map(function(x){ return x.d || ''; });
+    var dayData = byDay.map(function(x){ return x.cnt || 0; });
+    new Chart(document.getElementById('trendChart'), {
+      type: 'line',
+      data: {
+        labels: dayLabels,
+        datasets: [{
+          label: '新增产品',
+          data: dayData,
+          borderColor: '#1E6BD9',
+          backgroundColor: 'rgba(30,107,217,.15)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 4,
+          pointBackgroundColor: '#1E6BD9'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+      }
+    });
+  </script>
 </body>
 </html>
