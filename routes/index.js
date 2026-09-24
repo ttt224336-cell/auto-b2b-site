@@ -111,4 +111,25 @@ r.post('/inquiry', (req, res) => {
   );
 });
 
+
+// AJAX 产品列表（分类切换不刷新整页）
+r.get('/api/products', (req, res) => {
+  const q = req.query.q || '';
+  const cat = req.query.cat || '';
+  const s = req.query.sort || 'date';
+  let w = 'status = 1';
+  const p = [];
+  let o = 'id DESC';
+  if (q) {
+    w += ' AND (name_zh LIKE ? OR name_en LIKE ? OR oe LIKE ? OR model LIKE ?)';
+    p.push('%'+q+'%', '%'+q+'%', '%'+q+'%', '%'+q+'%');
+  }
+  if (cat) { w += ' AND category_id = ?'; p.push(cat); }
+  if (s === 'priceAsc') o = 'price ASC';
+  if (s === 'priceDesc') o = 'price DESC';
+  db.all('SELECT * FROM products WHERE ' + w + ' ORDER BY ' + o, p, (err, rows) => {
+    res.json({ success: !err, products: rows || [] });
+  });
+});
+
 module.exports = r;
