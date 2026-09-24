@@ -54,4 +54,23 @@ upload.anyFile = multer({
   limits: { fileSize: 15 * 1024 * 1024 }
 });
 
+
+// 完整备份包：允许 zip / json
+const backupFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const ok = ['.zip', '.json'].includes(ext) ||
+    (file.mimetype && (
+      file.mimetype.includes('zip') ||
+      file.mimetype.includes('json') ||
+      file.mimetype === 'application/octet-stream'
+    ));
+  cb(null, !!ok);
+};
+upload.backup = multer({
+  storage,
+  limits: { fileSize: 80 * 1024 * 1024 },
+  fileFilter: backupFilter
+});
+
 module.exports = upload;
+
