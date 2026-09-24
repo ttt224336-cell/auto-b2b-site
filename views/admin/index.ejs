@@ -248,6 +248,68 @@
     .social-item:hover { color:var(--accent); }
     .social-item:hover img { border-color:var(--accent); }
 
+
+    /* 询盘区 */
+    .inquiry-section {
+      padding: 56px 20px;
+      background: linear-gradient(180deg, #F0F5FB 0%, #E8EEF6 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .inquiry-section.has-bg::before {
+      content:''; position:absolute; inset:0; background-size:cover; background-position:center;
+      opacity:0.12; pointer-events:none;
+    }
+    .inquiry-section > * { position:relative; z-index:1; }
+    .inquiry-cards {
+      max-width: 1000px; margin: 28px auto 0;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+    }
+    .inquiry-card {
+      background:#fff; border-radius:14px; padding:24px 20px; text-align:center;
+      box-shadow:0 4px 16px rgba(10,47,95,.06); border:1px solid #E5E7EB;
+      transition: box-shadow .2s;
+    }
+    .inquiry-card:hover { box-shadow:0 8px 24px rgba(10,47,95,.1); }
+    .inquiry-card .ic {
+      width:48px; height:48px; border-radius:12px; margin:0 auto 14px;
+      display:flex; align-items:center; justify-content:center; font-size:22px;
+      background:linear-gradient(135deg,#1E6BD9,#0A2F5F); color:#fff;
+    }
+    .inquiry-card h4 { font-size:15px; color:var(--main); margin-bottom:6px; font-weight:600; }
+    .inquiry-card p { font-size:13px; color:var(--muted); word-break:break-all; }
+    .inquiry-cta { text-align:center; margin-top:28px; }
+    .inquiry-cta .btn { margin:6px; min-width:140px; }
+    /* 页脚 */
+    footer { background: #071e3d; color:#CBD5E1; padding:48px 20px 24px; margin-top:0; }
+    .foot-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:36px; }
+    .foot-col h4 { color:#F59E0B; margin-bottom:14px; font-size:15px; font-weight:600; letter-spacing:.02em; }
+    .foot-col p, .foot-col a { font-size:13px; line-height:1.9; color:#94A3B8; display:block; }
+    .foot-col a:hover { color:#F59E0B; }
+    .foot-brand { color:#F8FAFC !important; font-weight:600; font-size:15px !important; margin-bottom:8px !important; }
+    .foot-social-wrap {
+      max-width:1100px; margin:32px auto 0; padding-top:24px;
+      border-top:1px solid rgba(255,255,255,.1); text-align:center;
+    }
+    .foot-social-wrap .lab { font-size:12px; color:#64748B; margin-bottom:14px; text-transform:uppercase; letter-spacing:.06em; }
+    .social-bar { display:flex; flex-wrap:wrap; gap:16px; justify-content:center; }
+    .social-item {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      text-decoration:none; color:#94A3B8; font-size:12px; min-width:60px;
+    }
+    .social-item img {
+      width:44px; height:44px; border-radius:50%; object-fit:cover;
+      border:2px solid rgba(255,255,255,.15); background:#fff;
+      transition: border-color .2s, transform .2s;
+    }
+    .social-item:hover { color:#F59E0B; }
+    .social-item:hover img { border-color:#F59E0B; transform:translateY(-2px); }
+    .copyright { text-align:center; margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,.08); font-size:12px; color:#64748B; }
+    @media (max-width:800px) {
+      .inquiry-cards { grid-template-columns:1fr; max-width:400px; }
+      .foot-inner { grid-template-columns:1fr; gap:24px; text-align:center; }
+    }
+
   </style>
 </head>
 <body class="<%= (config && config.page_bg_full==='1' && config.page_bg) ? 'page-bg-full' : '' %>"
@@ -433,7 +495,7 @@
                     <span class="i18n-zh"><%= p.name_zh || p.name_en || '未命名' %></span>
                     <span class="i18n-en"><%= p.name_en || p.name_zh || 'Unnamed' %></span>
                   </h3>
-                  <div class="card-meta">OE: <%= p.oe || '-' %><span class="i18n-zh"><%= p.model ? ' · ' + p.model : '' %></span><span class="i18n-en"><% if(p.model){ var _em=String(p.model).replace(/[\u4e00-\u9fff]+/g,' ').replace(/\s+/g,' ').trim(); if(_em){ %> · <%= _em %><% }} %></span></div>
+                  <div class="card-meta">OE: <%= p.oe || '-' %> · <%= p.model || '' %></div>
                   <div class="price" data-hkd="<%= p.price || 0 %>">
                     <span class="cur-sym">HK$</span><span class="cur-val"><%= Number(p.price||0).toFixed(2) %></span>
                   </div>
@@ -451,11 +513,44 @@
     </div>
   </section>
 
-  <section class="section" id="inquiry" style="background:#fff;">
-    <h2 class="section-title"><span class="i18n-zh">联系我们 / 询盘</span><span class="i18n-en">Contact / Inquiry</span></h2>
-    <p class="section-sub">WhatsApp: <%= (config && config.wa) || '+85264960641' %> · Email: <%= (config && config.email) || '' %></p>
-    <div style="max-width:480px;margin:0 auto;text-align:center;">
+  <section class="inquiry-section <%= (config && config.inquiry_bg) ? 'has-bg' : '' %>" id="inquiry"
+    <% if (config && config.inquiry_bg) { %>style="background-image:none;"<% } %>>
+    <% if (config && config.inquiry_bg) { %>
+    <style>.inquiry-section.has-bg::before{background-image:url('<%= config.inquiry_bg %>');}</style>
+    <% } %>
+    <h2 class="section-title">
+      <span class="i18n-zh"><%= (config && config.inquiry_title_zh) || '联系我们 / 询盘' %></span>
+      <span class="i18n-en"><%= (config && config.inquiry_title_en) || 'Contact / Inquiry' %></span>
+    </h2>
+    <p class="section-sub">
+      <span class="i18n-zh"><%= (config && config.inquiry_desc_zh) || '欢迎询价 · 快速回复 · 支持 OEM / ODM 与小批量试单' %></span>
+      <span class="i18n-en"><%= (config && config.inquiry_desc_en) || 'Welcome to inquire · Fast response · OEM / ODM & small MOQ supported' %></span>
+    </p>
+    <div class="inquiry-cards">
+      <div class="inquiry-card">
+        <div class="ic">💬</div>
+        <h4>WhatsApp</h4>
+        <p><%= (config && config.wa) || '+85264960641' %></p>
+      </div>
+      <div class="inquiry-card">
+        <div class="ic">✉️</div>
+        <h4>Email</h4>
+        <p><%= (config && config.email) || 'sales@example.com' %></p>
+      </div>
+      <div class="inquiry-card">
+        <div class="ic">📍</div>
+        <h4><span class="i18n-zh">地址</span><span class="i18n-en">Address</span></h4>
+        <p><%= (config && config.address) || 'Hong Kong' %></p>
+        <% if (config && config.work_hours) { %>
+        <p style="margin-top:6px;font-size:12px;"><span class="i18n-zh">工作时间</span><span class="i18n-en">Hours</span>: <%= config.work_hours %></p>
+        <% } %>
+      </div>
+    </div>
+    <div class="inquiry-cta">
       <a href="https://wa.me/<%= ((config && config.wa) || '85264960641').replace(/[^0-9]/g,'') %>" class="btn btn-main" style="background:var(--blue);color:#fff;" target="_blank" rel="noopener">WhatsApp</a>
+      <% if (config && config.email) { %>
+      <a href="mailto:<%= config.email %>" class="btn" style="background:#fff;border:1.5px solid #1E6BD9;color:#1E6BD9;">Email</a>
+      <% } %>
     </div>
   </section>
 
@@ -479,11 +574,7 @@
         </h1>
         <div class="meta">
           <p><strong>OE：</strong><%= product.oe || '-' %></p>
-          <% function toEnModel(m){ if(!m)return '-'; var s=String(m).replace(/[\u4e00-\u9fff]+/g,' ').replace(/[\u3000-\u303f\uff00-\uffef]/g,' ').replace(/[（）()【】\[\]]/g,' ').replace(/\s+/g,' ').trim(); return s||'-'; } %>
-          <p><strong><span class="i18n-zh">适用型号</span><span class="i18n-en">Compatible Models</span>:</strong>
-            <span class="i18n-zh"><%= product.model || '-' %></span>
-            <span class="i18n-en"><%= toEnModel(product.model) %></span>
-          </p>
+          <p><strong><span class="i18n-zh">适用型号</span><span class="i18n-en">Model</span>：</strong><%= product.model || '-' %></p>
           <p><strong><span class="i18n-zh">库存</span><span class="i18n-en">Stock</span>：</strong><%= product.stock != null ? product.stock : '-' %></p>
         </div>
         <div class="price" data-hkd="<%= product.price || 0 %>" style="font-size:22px;margin:12px 0;">
@@ -512,21 +603,30 @@
     <div class="foot-inner">
       <div class="foot-col">
         <h4><span class="i18n-zh">关于我们</span><span class="i18n-en">About Us</span></h4>
-        <p style="color:#F8FAFC;font-weight:600;margin-bottom:6px;"><%= (config && config.company_name) || 'AutoParts B2B' %></p>
+        <p class="foot-brand"><%= (config && config.company_name) || 'AutoParts B2B' %></p>
         <p><%= (config && config.address) || 'Hong Kong / Shenzhen' %></p>
-        <p style="margin-top:8px;">
-          <span class="i18n-zh">专业汽车零部件供应商，支持 OEM / ODM，服务全球客户。</span>
-          <span class="i18n-en">Professional auto parts supplier. OEM / ODM for global customers.</span>
+        <p style="margin-top:10px;">
+          <span class="i18n-zh"><%= (config && config.about_zh) || '专业汽车零部件供应商，严格品控，支持 OEM / ODM，服务全球客户。' %></span>
+          <span class="i18n-en"><%= (config && config.about_en) || 'Professional auto parts supplier with strict QC. OEM / ODM for global customers.' %></span>
         </p>
       </div>
       <div class="foot-col">
         <h4><span class="i18n-zh">联系我们</span><span class="i18n-en">Contact Us</span></h4>
         <p>Email: <%= (config && config.email) || '' %></p>
         <p>WhatsApp: <%= (config && config.wa) || '' %></p>
+        <% if (config && config.contact_phone) { %><p><span class="i18n-zh">电话</span><span class="i18n-en">Phone</span>: <%= config.contact_phone %></p><% } %>
+        <% if (config && config.work_hours) { %><p><span class="i18n-zh">工作时间</span><span class="i18n-en">Hours</span>: <%= config.work_hours %></p><% } %>
+      </div>
+      <div class="foot-col">
+        <h4><span class="i18n-zh">快速链接</span><span class="i18n-en">Quick Links</span></h4>
+        <a href="/"><span class="i18n-zh">首页</span><span class="i18n-en">Home</span></a>
+        <a href="/#products"><span class="i18n-zh">产品中心</span><span class="i18n-en">Products</span></a>
+        <a href="/#factory"><span class="i18n-zh">工厂展示</span><span class="i18n-en">Factory</span></a>
+        <a href="/#inquiry"><span class="i18n-zh">询盘联系</span><span class="i18n-en">Inquiry</span></a>
       </div>
     </div>
-    <div class="foot-social-wrap" style="max-width:1100px;margin:28px auto 0;padding-top:22px;border-top:1px solid rgba(255,255,255,.12);text-align:center;">
-      <div style="font-size:12px;color:#64748B;margin-bottom:12px;"><span class="i18n-zh">关注我们</span><span class="i18n-en">Follow Us</span></div>
+    <div class="foot-social-wrap">
+      <div class="lab"><span class="i18n-zh">关注我们</span><span class="i18n-en">Follow Us</span></div>
       <div class="social-bar" id="socialBar">
         <% if (config && config.social1_img) { %>
         <a class="social-item" href="<%= config.social1_url || '#' %>" target="_blank" rel="noopener">
@@ -548,7 +648,6 @@
         <% } %>
       </div>
     </div>
-
     <div class="copyright"><%= (config && config.copyright_text) || '© 2026 AutoParts B2B. All rights reserved.' %></div>
   </footer>
 
